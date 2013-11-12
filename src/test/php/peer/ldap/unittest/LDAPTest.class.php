@@ -1,4 +1,4 @@
-<?php namespace net\xp_framework\unittest\peer\ldap;
+<?php namespace peer\ldap\unittest;
  
 use peer\ldap\LDAPClient;
 use peer\ldap\LDAPQuery;
