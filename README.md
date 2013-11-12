@@ -7,7 +7,10 @@ Protocol) access.
 Example (LDAP search)
 ---------------------
 
-```
+```php
+use peer\ldap\LDAPClient;
+use util\cmd\Console;
+
 $l= new LDAPClient('ldap.openldap.org');
 $l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
 $l->connect();
@@ -30,6 +33,9 @@ Example (Modifying an entry)
 ----------------------------
 
 ```php
+use peer\ldap\LDAPClient;
+use peer\ldap\LDAPEntry;
+
 $l= new LDAPClient('ldap.example.com');
 $l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
 $l->connect();
@@ -48,6 +54,9 @@ Example (Adding an entry)
 -------------------------
 
 ```php
+use peer\ldap\LDAPClient;
+use peer\ldap\LDAPEntry;
+
 $l= new LDAPClient('ldap.example.com');
 $l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
 $l->connect();
@@ -71,6 +80,8 @@ If the LDAP queries need to be constructed dynamically the LDAPQuery
 class provides a printf-style syntax to do so:
 
 ```php
+use peer\ldap\LDAPQuery;
+
 $res= $ldap->searchBy(new LDAPQuery(
   '(&(objectClass=%c)(|(username=%s)(uid=%d)))',
   'xpPerson',
