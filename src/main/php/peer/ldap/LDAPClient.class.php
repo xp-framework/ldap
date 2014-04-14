@@ -1,12 +1,11 @@
 <?php namespace peer\ldap;
 
 // Search scopes
-  define('LDAP_SCOPE_BASE',     0x0000);
+define('LDAP_SCOPE_BASE',     0x0000);
 define('LDAP_SCOPE_ONELEVEL', 0x0001);
 define('LDAP_SCOPE_SUB',      0x0002);
 
 use peer\ConnectException;
-
 
 /**
  * LDAP client
@@ -64,7 +63,11 @@ class LDAPClient extends \lang\Object {
     
   public
     $_hdl;
-  
+
+  static function __static() {
+    \lang\XPClass::forName('peer.ldap.LDAPException');  // Error codes
+  }
+
   /**
    * Constructor
    *
@@ -103,7 +106,7 @@ class LDAPClient extends \lang\Object {
   public function bind($user= null, $pass= null) {
     if (false === ($res= ldap_bind($this->_hdl, $user, $pass))) {
       switch ($error= ldap_errno($this->_hdl)) {
-        case LDAP_SERVER_DOWN:
+        case -1: case LDAP_SERVER_DOWN:
           throw new ConnectException('Cannot connect to '.$this->host.':'.$this->port);
         
         default:
