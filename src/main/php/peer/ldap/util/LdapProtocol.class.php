@@ -32,6 +32,10 @@ class LdapProtocol extends \lang\Object {
   const DEREF_BASE_OBJECT = 2;
   const DEREF_ALWAYS = 3;
 
+  protected static $continue= [
+    self::REP_SEARCH_ENTRY => true
+  ];
+
   protected $messageId= 0;
 
   public function __construct(\peer\Socket $sock) {
@@ -49,49 +53,32 @@ class LdapProtocol extends \lang\Object {
   }
 
   public function send($message) {
-    $this->stream->startSequence();
-    $this->stream->writeInt($this->nextMessageId());
-    call_user_func($message['write'], $this->stream);
-    $this->stream->endSequence();
-
+    with ($this->stream->startSequence()); {
+      $this->stream->writeInt($this->nextMessageId());
+      $this->stream->startSequence($message['req']);
+      call_user_func($message['write'], $this->stream);
+      $this->stream->endSequence();
+      $this->stream->endSequence();
+    }
     $this->stream->flush();
 
-    return call_user_func($message['read'], $this->stream);
+    $result= [];
+    do {
+      with ($this->stream->readSequence()); {
+        $messageId= $this->stream->readInt();
+        $tag= $this->stream->readSequence($message['rep']);
+        $result[]= call_user_func($message['read'][$tag], $this->stream);
+        $this->stream->finishSequence();
+        $this->stream->finishSequence();
+      }
+    } while (isset(self::$continue[$tag]));
+    return $result;
   }
 
   public function search() {
-    static $handlers= null;
-
-    if (!$handlers) $handlers= [
-      self::REP_SEARCH_ENTRY => function($stream) {
-        $name= $stream->readString();
-        $stream->readSequence();
-        $attributes= [];
-        do {
-          $stream->readSequence();
-          $attr= $stream->readString();
-
-          $stream->readSequence(0x31);
-          $attributes[$attr]= [];
-          do {
-            $attributes[$attr][]= $stream->readString();
-          } while ($stream->remaining());
-          $stream->finishSequence();
-
-          $stream->finishSequence();
-        } while ($stream->remaining());
-        $stream->finishSequence();
-        return ['name' => $name, 'attr' => $attributes];
-      },
-      self::REP_SEARCH => function($stream) {
-        $stream->read($stream->remaining());    // XXX FIXME
-        return '<EOR>';
-      }
-    ];
-
     return $this->send([
+      'req'   => self::REQ_SEARCH,
       'write' => function($stream) {
-        $stream->startSequence(self::REQ_SEARCH);
         $stream->writeString('o=example');
         $stream->writeEnumeration(0);
         $stream->writeEnumeration(0);
@@ -105,23 +92,34 @@ class LdapProtocol extends \lang\Object {
 
         $stream->startSequence();
         $stream->endSequence();
-        $stream->endSequence();
       },
-      'read'  => function($stream) use($handlers) {
-        $result= [];
-        do {
+      'rep'   => [self::REP_SEARCH_ENTRY, self::REP_SEARCH],
+      'read'  => [
+        self::REP_SEARCH_ENTRY => function($stream) {
+          $name= $stream->readString();
           $stream->readSequence();
-          $messageId= $stream->readInt();
+          $attributes= [];
+          do {
+            $stream->readSequence();
+            $attr= $stream->readString();
 
-          $tag= $stream->readSequence([self::REP_SEARCH_ENTRY, self::REP_SEARCH]);
-          $result[]= call_user_func($handlers[$tag], $stream);
+            $stream->readSequence(0x31);
+            $attributes[$attr]= [];
+            do {
+              $attributes[$attr][]= $stream->readString();
+            } while ($stream->remaining());
+            $stream->finishSequence();
+
+            $stream->finishSequence();
+          } while ($stream->remaining());
           $stream->finishSequence();
-
-          $stream->finishSequence();
-        } while (self::REP_SEARCH_ENTRY === $tag);
-
-        return $result;
-      }
+          return ['name' => $name, 'attr' => $attributes];
+        },
+        self::REP_SEARCH => function($stream) {
+          $stream->read($stream->remaining());    // XXX FIXME
+          return '<EOR>';
+        }
+      ]
     ]);
   }
 
