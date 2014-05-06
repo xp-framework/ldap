@@ -12,16 +12,16 @@ class LdapProtocol extends \lang\Object {
   const REQ_ABANDON = 0x50;
   const REQ_EXTENSION = 0x77;
 
-  const REP_BIND = 0x61;
-  const REP_SEARCH_ENTRY = 0x64;
-  const REP_SEARCH_REF = 0x73;
-  const REP_SEARCH = 0x65;
-  const REP_MODIFY = 0x67;
-  const REP_ADD = 0x69;
-  const REP_DELETE = 0x6b;
-  const REP_MODRDN = 0x6d;
-  const REP_COMPARE = 0x6f;
-  const REP_EXTENSION = 0x78;
+  const RES_BIND = 0x61;
+  const RES_SEARCH_ENTRY = 0x64;
+  const RES_SEARCH_REF = 0x73;
+  const RES_SEARCH = 0x65;
+  const RES_MODIFY = 0x67;
+  const RES_ADD = 0x69;
+  const RES_DELETE = 0x6b;
+  const RES_MODRDN = 0x6d;
+  const RES_COMPARE = 0x6f;
+  const RES_EXTENSION = 0x78;
 
   const SCOPE_BASE_OBJECT = 0;
   const SCOPE_ONE_LEVEL   = 1;
@@ -33,7 +33,7 @@ class LdapProtocol extends \lang\Object {
   const DEREF_ALWAYS = 3;
 
   protected static $continue= [
-    self::REP_SEARCH_ENTRY => true
+    self::RES_SEARCH_ENTRY => true
   ];
 
   protected $messageId= 0;
@@ -66,7 +66,7 @@ class LdapProtocol extends \lang\Object {
     do {
       with ($this->stream->readSequence()); {
         $messageId= $this->stream->readInt();
-        $tag= $this->stream->readSequence($message['rep']);
+        $tag= $this->stream->readSequence($message['res']);
         $result[]= call_user_func($message['read'][$tag], $this->stream);
         $this->stream->finishSequence();
         $this->stream->finishSequence();
@@ -93,9 +93,9 @@ class LdapProtocol extends \lang\Object {
         $stream->startSequence();
         $stream->endSequence();
       },
-      'rep'   => [self::REP_SEARCH_ENTRY, self::REP_SEARCH],
+      'res'   => [self::RES_SEARCH_ENTRY, self::RES_SEARCH],
       'read'  => [
-        self::REP_SEARCH_ENTRY => function($stream) {
+        self::RES_SEARCH_ENTRY => function($stream) {
           $name= $stream->readString();
           $stream->readSequence();
           $attributes= [];
@@ -115,7 +115,7 @@ class LdapProtocol extends \lang\Object {
           $stream->finishSequence();
           return ['name' => $name, 'attr' => $attributes];
         },
-        self::REP_SEARCH => function($stream) {
+        self::RES_SEARCH => function($stream) {
           $stream->read($stream->remaining());    // XXX FIXME
           return '<EOR>';
         }
