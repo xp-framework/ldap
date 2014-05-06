@@ -42,6 +42,8 @@ class BerStream extends \lang\Object {
   protected $write= [''];
   protected $read= [0];
 
+  protected $in, $out;
+
   /**
    * Constructor
    *
