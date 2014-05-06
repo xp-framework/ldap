@@ -75,11 +75,11 @@ class LdapProtocol extends \lang\Object {
     return $result;
   }
 
-  public function search() {
+  public function search($base) {
     return $this->send([
       'req'   => self::REQ_SEARCH,
-      'write' => function($stream) {
-        $stream->writeString('o=example');
+      'write' => function($stream) use($base) {
+        $stream->writeString($base);
         $stream->writeEnumeration(0);
         $stream->writeEnumeration(0);
         $stream->writeInt(0);
