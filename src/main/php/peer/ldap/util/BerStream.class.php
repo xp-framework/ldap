@@ -40,6 +40,7 @@ class BerStream extends \lang\Object {
   const SEQ_CTOR = 48;   // (SEQUENCE | CONSTRUCTOR)
 
   protected $write= [''];
+  protected $read= [0];
 
   /**
    * Constructor
@@ -246,49 +247,135 @@ class BerStream extends \lang\Object {
    * @return int number of bytes written
    */
   public function flush() {
-    return $this->out->write($this->write[0]);
+    $w= $this->out->write($this->write[0]);
+    $this->write= [''];
+    return $w;
+  }
+
+  public function read($l) {
+    $t= debug_backtrace();
+    $chunk= $this->in->read($l);
+    $this->read[0]-= strlen($chunk);
+    // fprintf(STDOUT, "%s   READ %d bytes from %s, remain %d\n", str_repeat('   ', sizeof($this->read)), $l, $t[1]['function'], $this->read[0]);
+    return $chunk;
+  }
+
+  public function readTag($expected) {
+    $head= unpack('Ctag', $this->in->read(1));
+    $test= (array)$expected;
+    if (!in_array($head['tag'], $test)) {
+      throw new \lang\IllegalStateException(sprintf(
+        'Expected any of [%s], have 0x%02x',
+        implode(', ', array_map(function($t) { return sprintf('0x%02x', $t); }, $test)),
+        $head['tag']
+      ));
+    }
+
+    return $head['tag'];
+  }
+
+  protected function decodeLength() {
+    $head= unpack('Cl0', $this->in->read(1));
+    if ($head['l0'] <= 0x7f) {
+      $length= $head['l0'];
+      $this->read[0]-= 2;
+    } else if (0x81 === $head['l0']) {
+      $l= unpack('C', $this->in->read(1));
+      $length= $l[1];
+      $this->read[0]-= 3;
+    } else if (0x82 === $head['l0']) {
+      $l= unpack('C2', $this->in->read(2));
+      $length= $l[1] * 0x100 + $l[2];
+      $this->read[0]-= 4;
+    } else if (0x83 === $head['l0']) {
+      $l= unpack('C3', $this->in->read(3));
+      $length= $l[1] * 0x10000 + $l[2] * 0x100 + $l[3];
+      $this->read[0]-= 5;
+    } else {
+      throw new \lang\IllegalStateException('Length too long: '.$head['l0']);
+    }
+    return $length;
+  }
+
+  /**
+   * Reads an integer
+   *
+   * @return int
+   */
+  public function readInt() {
+    $this->readTag(self::INTEGER);
+    return unpack('N', str_pad($this->read($this->decodeLength()), 4, "\0", STR_PAD_LEFT))[1];
+  }
+
+  /**
+   * Reads an enumeration
+   *
+   * @return int
+   */
+  public function readEnumeration() {
+    $this->readTag(self::ENUMERATION);
+    return unpack('N', str_pad($this->read($this->decodeLength()), 4, "\0", STR_PAD_LEFT))[1];
+  }
+
+  /**
+   * Reads a string
+   *
+   * @return string
+   */
+  public function readString() {
+    $this->readTag(self::OCTETSTRING);
+    return $this->read($this->decodeLength());
+  }
+
+  /**
+   * Reads a boolean
+   *
+   * @return bool
+   */
+  public function readBoolean() {
+    $this->readTag(self::BOOLEAN);
+    return $this->read($this->decodeLength()) ? true : false;
   }
 
   /**
    * Read sequence
    *
-   * @param  string $tag expected tag
-   * @return var
+   * @param  var $tag expected either a tag or an array of tags
+   * @return int The found tag
    */
   public function readSequence($tag= self::SEQ_CTOR) {
-    $head= unpack('Ctag/Cl0/a3rest', $this->in->read(5));
-    if ($head['tag'] !== $tag) {
-      throw new \lang\IllegalStateException(sprintf('Expected %0x, have %0x', $tag, $head['tag']));
-    }
+    $tag= $this->readTag($tag);
+    $len= $this->decodeLength();
+    $this->read[0]-= $len;
+    array_unshift($this->read, $len);
+    // fprintf(STDOUT, "%s`- BEGIN SEQ %d bytes\n", str_repeat('   ', sizeof($this->read)), $this->read[0]);
+    return $tag;
+  }
 
-    if ($head['l0'] <= 0x7f) {
-      $length= $head['l0'];
-      $this->in->pushBack(substr($head['rest']));
-    } else if (0x81 === $head['l0']) {
-      $l= unpack('C', $head['rest']);
-      $length= $l[1];
-      $this->in->pushBack(substr($head['rest'], 1));
-    } else if (0x82 === $head['l0']) {
-      $l= unpack('C2', $head['rest']);
-      $length= $l[1] * 0x100 + $l[2];
-      $this->in->pushBack(substr($head['rest'], 2));
-    } else if (0x83 === $head['l0']) {
-      $l= unpack('C3', $head['rest']);
-      $length= $l[1] * 0x10000 + $l[2] * 0x100 + $l[3];
-    } else {
-      throw new \lang\IllegalStateException('Length too long: '.$head['l0']);
-    }
+  public function remaining() {
+    return $this->read[0];
+  }
 
-    return ['tag' => $tag, 'length' => $length];
+  public function available() {
+    return $this->in->available();
   }
 
   /**
-   * Read response
-   *
-   * @return var
+   * Finish reading a sequence
    */
-  public function read() {
-    $seq= $this->readSequence();
-    return $seq;
+  public function finishSequence() {
+    // fprintf(STDOUT, "%s   END SEQ remain: %d bytes\n", str_repeat('   ', sizeof($this->read)), $this->read[0]);
+    $shift= array_shift($this->read);
+    $this->read[0]-= $shift;
+  }
+
+  /**
+   * Closes I/O
+   *
+   * @return void
+   */
+  public function close() {
+    $this->in->close();
+    $this->out->close();
   }
 }
