@@ -80,8 +80,8 @@ class LdapProtocol extends \lang\Object {
       'req'   => self::REQ_SEARCH,
       'write' => function($stream) use($base) {
         $stream->writeString($base);
-        $stream->writeEnumeration(0);
-        $stream->writeEnumeration(0);
+        $stream->writeEnumeration(self::SCOPE_ONE_LEVEL);
+        $stream->writeEnumeration(self::NEVER_DEREF_ALIASES);
         $stream->writeInt(0);
         $stream->writeInt(0);
         $stream->writeBoolean(false);
