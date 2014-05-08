@@ -1,5 +1,7 @@
 <?php namespace peer\ldap\util;
 
+use peer\ldap\LDAPException;
+
 class LdapProtocol extends \lang\Object {
   const REQ_BIND = 0x60;
   const REQ_UNBIND = 0x42;
@@ -31,6 +33,8 @@ class LdapProtocol extends \lang\Object {
   const DEREF_IN_SEARCHING = 1;
   const DEREF_BASE_OBJECT = 2;
   const DEREF_ALWAYS = 3;
+
+  const STATUS_OK = 0;
 
   protected static $continue= [
     self::RES_SEARCH_ENTRY => true
@@ -89,6 +93,38 @@ class LdapProtocol extends \lang\Object {
       }
     } while (isset(self::$continue[$tag]));
     return $result;
+  }
+
+
+  /**
+   * Bind
+   *
+   * @param  string $user
+   * @param  string $password
+   */
+  public function bind($user, $password) {
+    $result= $this->send([
+      'req'   => self::REQ_BIND,
+      'write' => function($stream) use($user, $password) {
+        $stream->writeInt($version= 3);
+        $stream->writeString($user);
+        $stream->writeString($password, BerStream::CONTEXT);
+      },
+      'res'   => self::RES_BIND,
+      'read'  => [self::RES_BIND => function($stream) {
+        $status= $stream->readEnumeration();
+        $matchedDN= $stream->readString();
+        $error= $stream->readString();
+
+        // TODO: Referalls
+        $stream->read($stream->remaining());
+        return  ['status' => $status, 'matchedDN' => $matchedDN, 'error' => $error];
+      }]
+    ])[0];
+    \util\cmd\Console::writeLine($result);
+    if (self::STATUS_OK === $result['status']) return true;
+
+    throw new LDAPException($result['error'] ?: 'Bind error', $result['status']);
   }
 
   /**
