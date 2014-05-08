@@ -79,7 +79,7 @@ class BerStream extends \lang\Object {
     ]);
     */
 
-    $this->in= $in instanceof BufferedInputStream ? $in : new BufferedInputStream($in);
+    $this->in= $in instanceof BufferedInputStream ? $in : new BufferedInputStream($in, 8192);
     $this->out= $out;
   }
 
