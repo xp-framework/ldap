@@ -38,6 +38,11 @@ class LdapProtocol extends \lang\Object {
 
   protected $messageId= 0;
 
+  /**
+   * Creates a new protocol instance communicating on the given socket
+   *
+   * @param  peer.Socket $sock
+   */
   public function __construct(\peer\Socket $sock) {
     $this->stream= new BerStream(
       $sock->getInputStream(),
@@ -45,6 +50,11 @@ class LdapProtocol extends \lang\Object {
     );
   }
 
+  /**
+   * Calculates and returns next message id, starting with 1.
+   *
+   * @return  int
+   */
   protected function nextMessageId() {
     if (++$this->messageId >= 0x7fffffff) {
       $this->messageId= 1;
@@ -52,6 +62,12 @@ class LdapProtocol extends \lang\Object {
     return $this->messageId;
   }
 
+  /**
+   * Send message, return result
+   *
+   * @param  var $message
+   * @return var
+   */
   public function send($message) {
     with ($this->stream->startSequence()); {
       $this->stream->writeInt($this->nextMessageId());
@@ -75,6 +91,12 @@ class LdapProtocol extends \lang\Object {
     return $result;
   }
 
+  /**
+   * Search
+   *
+   * @param  string $base
+   * @return var
+   */
   public function search($base) {
     return $this->send([
       'req'   => self::REQ_SEARCH,

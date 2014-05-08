@@ -53,6 +53,7 @@ class BerStream extends \lang\Object {
   public function __construct(InputStream $in, OutputStream $out) {
 
     // Debug
+    /*
     $in= newinstance('io.streams.InputStream', [$in], [
       'backing'     => null,
       '__construct' => function($backing) { $this->backing= $backing; },
@@ -76,6 +77,7 @@ class BerStream extends \lang\Object {
       'flush'       => function() { return $this->backing->flush(); },
       'close'       => function() { $this->backing->close(); }
     ]);
+    */
 
     $this->in= $in instanceof BufferedInputStream ? $in : new BufferedInputStream($in);
     $this->out= $out;
