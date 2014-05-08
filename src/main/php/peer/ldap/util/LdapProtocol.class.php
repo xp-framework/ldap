@@ -192,7 +192,17 @@ class LdapProtocol extends \lang\Object {
     ]);
   }
 
-  public function __destruct() {
+  /**
+   * Closes the connection
+   */
+  public function close() {
     $this->stream->close();
+  }
+
+  /**
+   * Destructor. Ensures stream is closed.
+   */
+  public function __destruct() {
+    $this->close();
   }
 }
