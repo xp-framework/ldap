@@ -101,6 +101,8 @@ class LdapProtocol extends \lang\Object {
    *
    * @param  string $user
    * @param  string $password
+   * @return void
+   * @throws peer.ldap.LDAPException
    */
   public function bind($user, $password) {
     $result= $this->send([
@@ -122,9 +124,9 @@ class LdapProtocol extends \lang\Object {
       }]
     ])[0];
     \util\cmd\Console::writeLine($result);
-    if (self::STATUS_OK === $result['status']) return true;
-
-    throw new LDAPException($result['error'] ?: 'Bind error', $result['status']);
+    if (self::STATUS_OK !== $result['status']) {
+      throw new LDAPException($result['error'] ?: 'Bind error', $result['status']);
+    }
   }
 
   /**
