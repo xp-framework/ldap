@@ -67,6 +67,18 @@ class LdapProtocol extends \lang\Object {
   }
 
   /**
+   * Handle response
+   *
+   * @param  int $status
+   * @param  sting $error
+   */
+  protected function handleResponse($status, $error= null) {
+    if (self::STATUS_OK !== $status) {
+      throw new LDAPException($error, $status);
+    }
+  }
+
+  /**
    * Send message, return result
    *
    * @param  var $message
@@ -125,10 +137,8 @@ class LdapProtocol extends \lang\Object {
         $error= $stream->readString();
 
         // TODO: Referalls
-        $stream->read($stream->remaining());
-        if (self::STATUS_OK !== $status) {
-          throw new LDAPException($error ?: 'Bind error', $status);
-        }
+
+        $this->handleResponse($status, $error ?: 'Bind error');
       }]
     ]);
   }
@@ -184,9 +194,7 @@ class LdapProtocol extends \lang\Object {
           $matchedDN= $stream->readString();
           $error= $stream->readString();
 
-          if (self::STATUS_OK !== $status) {
-            throw new LDAPException($error ?: 'Search failed', $status);
-          }
+          $this->handleResponse($status, $error ?: 'Search failed');
         }
       ]
     ]);
