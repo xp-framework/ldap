@@ -87,7 +87,14 @@ class LdapProtocol extends \lang\Object {
       with ($this->stream->readSequence()); {
         $messageId= $this->stream->readInt();
         $tag= $this->stream->readSequence($message['res']);
-        $result[]= call_user_func($message['read'][$tag], $this->stream);
+        try {
+          $result[]= call_user_func($message['read'][$tag], $this->stream);
+        } catch (\lang\XPException $e) {
+          $this->stream->finishSequence();
+          $this->stream->finishSequence();
+          $this->stream->read($this->stream->remaining());
+          throw $e;
+        }
         $this->stream->finishSequence();
         $this->stream->finishSequence();
       }
@@ -104,7 +111,7 @@ class LdapProtocol extends \lang\Object {
    * @throws peer.ldap.LDAPException
    */
   public function bind($user, $password) {
-    $result= $this->send([
+    $this->send([
       'req'   => self::REQ_BIND,
       'write' => function($stream) use($user, $password) {
         $stream->writeInt($version= 3);
@@ -119,13 +126,11 @@ class LdapProtocol extends \lang\Object {
 
         // TODO: Referalls
         $stream->read($stream->remaining());
-        return  ['status' => $status, 'matchedDN' => $matchedDN, 'error' => $error];
+        if (self::STATUS_OK !== $status) {
+          throw new LDAPException($error ?: 'Bind error', $status);
+        }
       }]
-    ])[0];
-    \util\cmd\Console::writeLine($result);
-    if (self::STATUS_OK !== $result['status']) {
-      throw new LDAPException($result['error'] ?: 'Bind error', $result['status']);
-    }
+    ]);
   }
 
   /**
@@ -175,8 +180,13 @@ class LdapProtocol extends \lang\Object {
           return ['name' => $name, 'attr' => $attributes];
         },
         self::RES_SEARCH => function($stream) {
-          $stream->read($stream->remaining());    // XXX FIXME
-          return '<EOR>';
+          $status= $stream->readEnumeration();
+          $matchedDN= $stream->readString();
+          $error= $stream->readString();
+
+          if (self::STATUS_OK !== $status) {
+            throw new LDAPException($error ?: 'Search failed', $status);
+          }
         }
       ]
     ]);
