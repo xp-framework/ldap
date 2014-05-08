@@ -95,7 +95,6 @@ class LdapProtocol extends \lang\Object {
     return $result;
   }
 
-
   /**
    * Bind
    *
