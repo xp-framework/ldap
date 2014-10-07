@@ -268,13 +268,13 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException
    * @throws  peer.ldap.LDAPException
    */
-  public function read(\LDAPEntry $entry) {
+  public function read(LDAPEntry $entry) {
     $res= ldap_read($this->_hdl, $entry->getDN(), 'objectClass=*', array(), false, 0);
     if (0 != ldap_errno($this->_hdl)) {
       throw new LDAPException('Read "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
 
-    return \LDAPEntry::fromResource($this->_hdl, ldap_first_entry($this->_hdl, $res));
+    return LDAPEntry::fromResource($this->_hdl, ldap_first_entry($this->_hdl, $res));
   }
   
   /**
@@ -283,7 +283,7 @@ class LDAPClient extends \lang\Object {
    * @param   peer.ldap.LDAPEntry entry specifying the dn
    * @return  bool TRUE if the entry exists
    */
-  public function exists(\LDAPEntry $entry) {
+  public function exists(LDAPEntry $entry) {
     $res= ldap_read($this->_hdl, $entry->getDN(), 'objectClass=*', array(), false, 0);
     
     // Check for certain error code (#32)
@@ -323,7 +323,7 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function add(\LDAPEntry $entry) {
+  public function add(LDAPEntry $entry) {
     
     // This actually returns NULL on failure, not FALSE, as documented
     if (null == ($res= ldap_add(
@@ -348,7 +348,7 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function modify(\LDAPEntry $entry) {
+  public function modify(LDAPEntry $entry) {
     if (false == ($res= ldap_modify(
       $this->_hdl,
       $entry->getDN(),
@@ -368,7 +368,7 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function delete(\LDAPEntry $entry) {
+  public function delete(LDAPEntry $entry) {
     if (false == ($res= ldap_delete(
       $this->_hdl,
       $entry->getDN()
@@ -387,7 +387,7 @@ class LDAPClient extends \lang\Object {
    * @param   var value
    * @return  bool
    */
-  public function addAttribute(\LDAPEntry $entry, $name, $value) {
+  public function addAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_add(
       $this->_hdl,
       $entry->getDN(),
@@ -406,7 +406,7 @@ class LDAPClient extends \lang\Object {
    * @param   string name
    * @return  bool
    */
-  public function deleteAttribute(\LDAPEntry $entry, $name) {
+  public function deleteAttribute(LDAPEntry $entry, $name) {
     if (false == ($res= ldap_mod_del(
       $this->_hdl,
       $entry->getDN(),
@@ -426,7 +426,7 @@ class LDAPClient extends \lang\Object {
    * @param   var value
    * @return  bool
    */
-  public function replaceAttribute(\LDAPEntry $entry, $name, $value) {
+  public function replaceAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_replace(
       $this->_hdl,
       $entry->getDN(),
