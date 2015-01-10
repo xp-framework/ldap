@@ -7,7 +7,7 @@ use peer\ldap\LDAPEntry;
  *
  * @see      xp://peer.ldap.LDAPEntry
  */
-class LDAPEntryTest extends \unittest\TestCase {
+abstract class LDAPEntryTest extends \unittest\TestCase {
   const DN = 'uid=friebe,ou=People,dc=xp-framework,dc=net';
 
   private $attributes = [
@@ -15,14 +15,17 @@ class LDAPEntryTest extends \unittest\TestCase {
     'sn'          => ['Friebe'],
     'givenName'   => ['Timm'],
     'uid'         => ['friebe'],
-    'displayName' => ['Friebe, Timm'],
+    'displayName' => ['Übercoder'],
     'mail'        => ['friebe@example.com'],
     'o'           => ['XP-Framework'],
     'ou'          => ['People'],
     'objectClass' => ['top', 'person', 'inetOrgPerson', 'organizationalPerson']
   ];
 
-  private $entry;
+  protected $fixture;
+
+  /** @return peer.ldap.LDAPEntry */
+  protected abstract function newInstance($dn, $attributes);
 
   /**
    * Setup method
@@ -30,57 +33,62 @@ class LDAPEntryTest extends \unittest\TestCase {
    * @return void
    */    
   public function setUp() {
-    $this->entry= new LDAPEntry(self::DN, $this->attributes);
+    $this->fixture= $this->newInstance(self::DN, $this->attributes);
   }
 
   #[@test]
   public function getDN() {
-    $this->assertEquals(self::DN, $this->entry->getDN());
+    $this->assertEquals(self::DN, $this->fixture->getDN());
   }
 
   #[@test]
   public function getAttributes() {
-    $this->assertEquals(array_change_key_case($this->attributes, CASE_LOWER), $this->entry->getAttributes());
+    $this->assertEquals(array_change_key_case($this->attributes, CASE_LOWER), $this->fixture->getAttributes());
   }
 
   #[@test]
   public function cnAttribute() {
-    $this->assertEquals(['Friebe, Timm J.'], $this->entry->getAttribute('cn'));
+    $this->assertEquals(['Friebe, Timm J.'], $this->fixture->getAttribute('cn'));
   }
 
   #[@test]
   public function firstCnAttribute() {
-    $this->assertEquals('Friebe, Timm J.', $this->entry->getAttribute('cn', 0));
+    $this->assertEquals('Friebe, Timm J.', $this->fixture->getAttribute('cn', 0));
+  }
+
+  #[@test]
+  public function unicodeAttribute() {
+    $this->assertEquals('Übercoder', $this->fixture->getAttribute('displayName', 0));
   }
 
   #[@test]
   public function nonExistantAttribute() {
-    $this->assertEquals(null, $this->entry->getAttribute('@@NON-EXISTANT@@'));
+    $this->assertEquals(null, $this->fixture->getAttribute('@@NON-EXISTANT@@'));
   }
 
   #[@test]
   public function objectClassAttribute() {
     $this->assertEquals(
       $this->attributes['objectClass'],
-      $this->entry->getAttribute('objectclass')
+      $this->fixture->getAttribute('objectclass')
     );
   }
 
   #[@test]
   public function isInetOrgPerson() {
-    $this->assertTrue($this->entry->isA('inetOrgPerson'));
+    $this->assertTrue($this->fixture->isA('inetOrgPerson'));
   }
 
   #[@test]
   public function isNotAliasObject() {
-    $this->assertFalse($this->entry->isA('alias'));
+    $this->assertFalse($this->fixture->isA('alias'));
   }
   
   #[@test]
   public function addAttributeTest() {
-    $this->entry->setAttribute('newAttribute', 'newValue');
+    $this->fixture->setAttribute('newAttribute', 'newValue');
     
-    $this->assertEquals('newValue', $this->entry->getAttribute('newattribute', 0));
-    $this->assertEquals('newValue', $this->entry->getAttribute('newAttribute', 0));
+    $this->assertEquals('newValue', $this->fixture->getAttribute('newattribute', 0));
+    $this->assertEquals('newValue', $this->fixture->getAttribute('newAttribute', 0));
   }
 }
