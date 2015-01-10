@@ -302,20 +302,6 @@ class LDAPClient extends \lang\Object {
   }
   
   /**
-   * Encode entries (recursively, if needed)
-   *
-   * @param   var v
-   * @return  string encoded entry
-   */
-  protected function _encode($v) {
-    if (is_array($v)) {
-      foreach (array_keys($v) as $i) $v[$i]= $this->_encode($v[$i]);
-      return $v;
-    }
-    return iconv(\xp::ENCODING, 'utf-8', $v);
-  }
-  
-  /**
    * Add an entry
    *
    * @param   peer.ldap.LDAPEntry entry
@@ -329,7 +315,7 @@ class LDAPClient extends \lang\Object {
     if (null == ($res= ldap_add(
       $this->_hdl, 
       $entry->getDN(), 
-      array_map(array($this, '_encode'), $entry->getAttributes())
+      $entry->getAttributes()
     ))) {
       throw new LDAPException('Add for "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
@@ -352,7 +338,7 @@ class LDAPClient extends \lang\Object {
     if (false == ($res= ldap_modify(
       $this->_hdl,
       $entry->getDN(),
-      array_map(array($this, '_encode'), $entry->getAttributes())
+      $entry->getAttributes()
     ))) {
       throw new LDAPException('Modify for "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
