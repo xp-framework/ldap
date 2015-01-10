@@ -76,8 +76,8 @@ class LDAPQueryTest extends \unittest\TestCase {
   }
 
   #[@test, @expect('lang.IllegalArgumentException'), @values([
-  #  [], [1, 2, 3], ['color' => 'green'],
-  #  new \lang\Object()
+  #  [[]], [[1, 2, 3]], [['color' => 'green']],
+  #  [new \lang\Object()]
   #])]
   public function invalid_argument($arg) {
     $this->fixture->prepare('%d', [1, 2, 3]);
