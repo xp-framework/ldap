@@ -31,20 +31,6 @@ class LDAPEntry extends \lang\Object {
   }
 
   /**
-   * Decode entries (recursively, if needed)
-   *
-   * @param   var v
-   * @return  string decoded entry
-   */
-  protected function _decode($v) {
-    if (is_array($v)) for ($i= 0, $m= sizeof($v); $i < $m; $i++) {
-      $v[$i]= $this->_decode($v[$i]);
-      return $v;
-    }
-    return iconv('utf-8', \xp::ENCODING, $v);
-  }
-  
-  /**
    * Create LDAPEntry from a given DN and associative
    * array
    *
@@ -56,18 +42,13 @@ class LDAPEntry extends \lang\Object {
     $e= new self($dn);
 
     foreach ($data as $key => $value) {
-      if ('count' == $key || is_int($key)) continue;
+      if ('count' === $key || is_int($key)) continue;
 
       // Store case-preserved version of key name in _ans array        
       $lkey= strtolower($key);
       $e->_ans[$lkey]= $key;
-      
-      if (is_array($value)) {
-        $e->attributes[$lkey]= array_map(array($e, '_decode'), $value);
-      } else {
-        $e->attributes[$lkey]= $e->_decode($value);
-      }
-      
+
+      $e->attributes[$lkey]= $value;
       unset($e->attributes[$lkey]['count']);
     }
 
