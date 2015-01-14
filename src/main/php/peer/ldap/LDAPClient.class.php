@@ -57,6 +57,10 @@ use peer\ConnectException;
  * @purpose  LDAP client
  */
 class LDAPClient extends \lang\Object {
+  const SCOPE_BASE      = 0x0000;
+  const SCOPE_ONELEVEL  = 0x0001;
+  const SCOPE_SUB       = 0x0002;
+
   public 
     $host,
     $port;
@@ -200,9 +204,9 @@ class LDAPClient extends \lang\Object {
    */
   public function searchBy(LDAPQuery $filter) {
     static $methods= array(
-      LDAP_SCOPE_BASE     => 'ldap_read',
-      LDAP_SCOPE_ONELEVEL => 'ldap_list',
-      LDAP_SCOPE_SUB      => 'ldap_search'
+      self::SCOPE_BASE     => 'ldap_read',
+      self::SCOPE_ONELEVEL => 'ldap_list',
+      self::SCOPE_SUB      => 'ldap_search'
     );
     
     if (empty($methods[$filter->getScope()]))
@@ -247,9 +251,9 @@ class LDAPClient extends \lang\Object {
   public function searchScope() {
     $args= func_get_args();
     switch ($args[0]) {
-      case LDAP_SCOPE_BASE: $func= 'ldap_read'; break;
-      case LDAP_SCOPE_ONELEVEL: $func= 'ldap_list'; break;
-      case LDAP_SCOPE_SUB: $func= 'ldap_search'; break;
+      case self::SCOPE_BASE: $func= 'ldap_read'; break;
+      case self::SCOPE_ONELEVEL: $func= 'ldap_list'; break;
+      case self::SCOPE_SUB: $func= 'ldap_search'; break;
       default: throw new \lang\IllegalArgumentException('Scope '.$args[0].' not supported');
     }
     $args[0]= $this->_hdl;
