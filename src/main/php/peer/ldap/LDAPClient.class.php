@@ -57,6 +57,10 @@ use peer\ConnectException;
  * @purpose  LDAP client
  */
 class LDAPClient extends \lang\Object {
+  const SCOPE_BASE      = 0x0000;
+  const SCOPE_ONELEVEL  = 0x0001;
+  const SCOPE_SUB       = 0x0002;
+
   public 
     $host,
     $port;
@@ -200,9 +204,9 @@ class LDAPClient extends \lang\Object {
    */
   public function searchBy(LDAPQuery $filter) {
     static $methods= array(
-      LDAP_SCOPE_BASE     => 'ldap_read',
-      LDAP_SCOPE_ONELEVEL => 'ldap_list',
-      LDAP_SCOPE_SUB      => 'ldap_search'
+      self::SCOPE_BASE     => 'ldap_read',
+      self::SCOPE_ONELEVEL => 'ldap_list',
+      self::SCOPE_SUB      => 'ldap_search'
     );
     
     if (empty($methods[$filter->getScope()]))
@@ -247,9 +251,9 @@ class LDAPClient extends \lang\Object {
   public function searchScope() {
     $args= func_get_args();
     switch ($args[0]) {
-      case LDAP_SCOPE_BASE: $func= 'ldap_read'; break;
-      case LDAP_SCOPE_ONELEVEL: $func= 'ldap_list'; break;
-      case LDAP_SCOPE_SUB: $func= 'ldap_search'; break;
+      case self::SCOPE_BASE: $func= 'ldap_read'; break;
+      case self::SCOPE_ONELEVEL: $func= 'ldap_list'; break;
+      case self::SCOPE_SUB: $func= 'ldap_search'; break;
       default: throw new \lang\IllegalArgumentException('Scope '.$args[0].' not supported');
     }
     $args[0]= $this->_hdl;
@@ -268,13 +272,13 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException
    * @throws  peer.ldap.LDAPException
    */
-  public function read(\LDAPEntry $entry) {
+  public function read(LDAPEntry $entry) {
     $res= ldap_read($this->_hdl, $entry->getDN(), 'objectClass=*', array(), false, 0);
     if (0 != ldap_errno($this->_hdl)) {
       throw new LDAPException('Read "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
 
-    return \LDAPEntry::fromResource($this->_hdl, ldap_first_entry($this->_hdl, $res));
+    return LDAPEntry::fromResource($this->_hdl, ldap_first_entry($this->_hdl, $res));
   }
   
   /**
@@ -283,7 +287,7 @@ class LDAPClient extends \lang\Object {
    * @param   peer.ldap.LDAPEntry entry specifying the dn
    * @return  bool TRUE if the entry exists
    */
-  public function exists(\LDAPEntry $entry) {
+  public function exists(LDAPEntry $entry) {
     $res= ldap_read($this->_hdl, $entry->getDN(), 'objectClass=*', array(), false, 0);
     
     // Check for certain error code (#32)
@@ -302,20 +306,6 @@ class LDAPClient extends \lang\Object {
   }
   
   /**
-   * Encode entries (recursively, if needed)
-   *
-   * @param   var v
-   * @return  string encoded entry
-   */
-  protected function _encode($v) {
-    if (is_array($v)) {
-      foreach (array_keys($v) as $i) $v[$i]= $this->_encode($v[$i]);
-      return $v;
-    }
-    return iconv(\xp::ENCODING, 'utf-8', $v);
-  }
-  
-  /**
    * Add an entry
    *
    * @param   peer.ldap.LDAPEntry entry
@@ -323,13 +313,13 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function add(\LDAPEntry $entry) {
+  public function add(LDAPEntry $entry) {
     
     // This actually returns NULL on failure, not FALSE, as documented
     if (null == ($res= ldap_add(
       $this->_hdl, 
       $entry->getDN(), 
-      array_map(array($this, '_encode'), $entry->getAttributes())
+      $entry->getAttributes()
     ))) {
       throw new LDAPException('Add for "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
@@ -348,11 +338,11 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function modify(\LDAPEntry $entry) {
+  public function modify(LDAPEntry $entry) {
     if (false == ($res= ldap_modify(
       $this->_hdl,
       $entry->getDN(),
-      array_map(array($this, '_encode'), $entry->getAttributes())
+      $entry->getAttributes()
     ))) {
       throw new LDAPException('Modify for "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
@@ -368,7 +358,7 @@ class LDAPClient extends \lang\Object {
    * @throws  lang.IllegalArgumentException when entry parameter is not an LDAPEntry object
    * @throws  peer.ldap.LDAPException when an error occurs during adding the entry
    */
-  public function delete(\LDAPEntry $entry) {
+  public function delete(LDAPEntry $entry) {
     if (false == ($res= ldap_delete(
       $this->_hdl,
       $entry->getDN()
@@ -387,7 +377,7 @@ class LDAPClient extends \lang\Object {
    * @param   var value
    * @return  bool
    */
-  public function addAttribute(\LDAPEntry $entry, $name, $value) {
+  public function addAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_add(
       $this->_hdl,
       $entry->getDN(),
@@ -406,7 +396,7 @@ class LDAPClient extends \lang\Object {
    * @param   string name
    * @return  bool
    */
-  public function deleteAttribute(\LDAPEntry $entry, $name) {
+  public function deleteAttribute(LDAPEntry $entry, $name) {
     if (false == ($res= ldap_mod_del(
       $this->_hdl,
       $entry->getDN(),
@@ -426,7 +416,7 @@ class LDAPClient extends \lang\Object {
    * @param   var value
    * @return  bool
    */
-  public function replaceAttribute(\LDAPEntry $entry, $name, $value) {
+  public function replaceAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_replace(
       $this->_hdl,
       $entry->getDN(),

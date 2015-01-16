@@ -3,5 +3,13 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
-* Heads up: Converted classes to PHP 5.3 namespaces - (@thekid)
+## 6.0.1 / 2015-01-16
 
+* Merged PR #1: Add class constants for SCOPE (@kiesel)
+
+## 6.0.0 / 2015-01-10
+
+* Removed superfluous encoding and decoding, XP encoding is utf-8 as is
+  the encoding for all LDAP calls.
+  (@thekid)
+* Heads up: Converted classes to PHP 5.3 namespaces - (@thekid)

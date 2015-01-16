@@ -1,12 +1,13 @@
 LDAP support for the XP Framework
 ========================================================================
 
-[![XP Framework Mdodule](https://raw.githubusercontent.com/xp-framework/web/master/static/xp-framework-badge.png)](https://github.com/xp-framework/core)
+[![Build Status on TravisCI](https://secure.travis-ci.org/xp-framework/ldap.svg)](http://travis-ci.org/xp-framework/ldap)
+[![XP Framework Module](https://raw.githubusercontent.com/xp-framework/web/master/static/xp-framework-badge.png)](https://github.com/xp-framework/core)
 [![BSD Licence](https://raw.githubusercontent.com/xp-framework/web/master/static/licence-bsd.png)](https://github.com/xp-framework/core/blob/master/LICENCE.md)
 [![Required PHP 5.4+](https://raw.githubusercontent.com/xp-framework/web/master/static/php-5_4plus.png)](http://php.net/)
+[![Latest Stable Version](https://poser.pugx.org/xp-framework/ldap/version.png)](https://packagist.org/packages/xp-framework/ldap)
 
-The peer.ldap package implements LDAP (Lighweight Directory Access 
-Protocol) access.
+The peer.ldap package implements LDAP (Lighweight Directory Access Protocol) access.
 
 Example (LDAP search)
 ---------------------
