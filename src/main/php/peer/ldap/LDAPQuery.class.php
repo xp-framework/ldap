@@ -1,7 +1,5 @@
 <?php namespace peer\ldap;
 
-
-
 /**
  * Class encapsulating LDAP queries.
  *
@@ -300,9 +298,9 @@ class LDAPQuery extends \lang\Object {
       if (is_array($value)) $value= implode(', ', $value);
       
       if ('scope' == $name) switch ($value) {
-        case LDAP_SCOPE_BASE: $value= 'LDAP_SCOPE_BASE'; break;
-        case LDAP_SCOPE_ONELEVEL: $value= 'LDAP_SCOPE_ONELEVEL'; break;
-        case LDAP_SCOPE_SUB: $value= 'LDAP_SCOPE_SUB'; break;
+        case LDAPClient::SCOPE_BASE: $value= 'LDAP_SCOPE_BASE'; break;
+        case LDAPClient::SCOPE_ONELEVEL: $value= 'LDAP_SCOPE_ONELEVEL'; break;
+        case LDAPClient::SCOPE_SUB: $value= 'LDAP_SCOPE_SUB'; break;
       }
       
       $str.= sprintf("  [%-".($namelen+5)."s] %s\n",
