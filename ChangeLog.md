@@ -3,7 +3,11 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 6.0.0 / 2015-10-01
+## 6.0.1 / 2015-02-12
+
+* Changed dependency to use XP ~6.0 (instead of dev-master) - @thekid
+
+## 6.0.0 / 2015-01-10
 
 * Removed superfluous encoding and decoding, XP encoding is utf-8 as is
   the encoding for all LDAP calls.
