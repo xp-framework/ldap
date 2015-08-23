@@ -1,12 +1,15 @@
 <?php namespace peer\ldap;
 
+use util\Objects;
+
 /**
  * Wraps LDAP entry
  *
  * @purpose  Represent a single entry
  * @see      xp://peer.ldap.LDAPSearchResult
  * @see      xp://peer.ldap.LDAPClient
- * @test     xp://net.xp_framework.unittest.peer.LDAPEntryTest
+ * @test     xp://peer.ldap.unittest.LDAPEntryTest
+ * @test     xp://peer.ldap.unittest.LDAPEntryCreateTest
  */
 class LDAPEntry extends \lang\Object {
   public
@@ -38,7 +41,7 @@ class LDAPEntry extends \lang\Object {
    * @param   [:string] data
    * @return  peer.ldap.LDAPEntry
    */
-  protected static function _create($dn, array $data) {
+  public static function create($dn, array $data) {
     $e= new self($dn);
 
     foreach ($data as $key => $value) {
@@ -55,30 +58,6 @@ class LDAPEntry extends \lang\Object {
     return $e;
   }
       
-  /**
-   * Creates an LDAP from the raw return data of PHP's ldap_* functions
-   * Also performs decoding on the attributes.
-   *
-   * @param   resource handle ldap connection
-   * @param   resource res ldap result resource
-   * @return  peer.ldap.LDAPEntry object
-   */
-  public static function fromResource($handle, $res) {
-    return self::_create(ldap_get_dn($handle, $res), ldap_get_attributes($handle, $res));
-  }
-  
-  /**
-   * Creates an LDAP from the raw return data of PHP's ldap_* functions
-   * Also performs decoding on the attributes.
-   *
-   * @param   var data return value from ldap_* functions
-   * @return  peer.ldap.LDAPEntry object
-   */
-  public static function fromData($data) {
-    $dn= $data['dn']; unset($data['dn']);
-    return self::_create($dn, $data);
-  }
-  
   /**
    * Set this entry's DN (distinct name)
    *
@@ -159,5 +138,19 @@ class LDAPEntry extends \lang\Object {
       $s.= sprintf("  [%-20s] %s\n", $this->_ans[$name], implode(', ', $attr));
     }
     return $s."}\n";
+  }
+
+  /**
+   * Returns whether a given comparison value is equal to this LDAP entry
+   *
+   * @param  var $cmp
+   * @return bool
+   */
+  public function equals($cmp) {
+    return (
+      $cmp instanceof self &&
+      $this->dn === $cmp->dn &&
+      Objects::equal($this->attributes, $cmp->attributes)
+    );
   }
 }
