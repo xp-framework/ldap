@@ -1,5 +1,7 @@
 <?php namespace peer\ldap;
 
+use util\Objects;
+
 /**
  * Wraps LDAP entry
  *
@@ -159,5 +161,19 @@ class LDAPEntry extends \lang\Object {
       $s.= sprintf("  [%-20s] %s\n", $this->_ans[$name], implode(', ', $attr));
     }
     return $s."}\n";
+  }
+
+  /**
+   * Returns whether a given comparison value is equal to this LDAP entry
+   *
+   * @param  var $cmp
+   * @return bool
+   */
+  public function equals($cmp) {
+    return (
+      $cmp instanceof self &&
+      $this->dn === $cmp->dn &&
+      Objects::equal($this->attributes, $cmp->attributes)
+    );
   }
 }
