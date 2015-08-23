@@ -3,6 +3,9 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Implemented xp-framework/ldap#3: LDAP entries iteration via `foreach`
+  (@thekid)
+
 ## 6.0.2 / 2015-02-12
 
 * Changed dependency to use XP ~6.0 (instead of dev-master) - @thekid
