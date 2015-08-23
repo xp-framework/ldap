@@ -193,7 +193,7 @@ class LDAPClient extends \lang\Object {
       throw new LDAPException('Search failed', ldap_errno($this->_hdl));
     }
     
-    return new LDAPSearchResult($this->_hdl, $res);
+    return new LDAPSearchResult(new LDAPEntries($this->_hdl, $res));
   }
   
   /**
@@ -230,7 +230,7 @@ class LDAPClient extends \lang\Object {
     if ($filter->getSort()) foreach ($filter->getSort() as $sort) {
       ldap_sort($this->_hdl, $res, $sort);
     }
-    return new LDAPSearchResult($this->_hdl, $res);
+    return new LDAPSearchResult(new LDAPEntries($this->_hdl, $res));
   }
   
   /**
@@ -261,7 +261,7 @@ class LDAPClient extends \lang\Object {
       throw new LDAPException('Search failed', ldap_errno($this->_hdl));
     }
     
-    return new LDAPSearchResult($this->_hdl, $res);
+    return new LDAPSearchResult(new LDAPEntries($this->_hdl, $res));
   }
   
   /**
