@@ -81,6 +81,7 @@ class LDAPSearchResultTest extends \unittest\TestCase {
   #])]
   public function iteration_via_next($entries) {
     $result= new LDAPSearchResult($this->newEntries($entries));
+    $actual= [];
     while ($entry= $result->getNextEntry()) {
       $actual[]= $entry->getDN();
     }
@@ -93,6 +94,7 @@ class LDAPSearchResultTest extends \unittest\TestCase {
   #])]
   public function iteration_via_first_and_ext($entries) {
     $result= new LDAPSearchResult($this->newEntries($entries));
+    $actual= [];
     if ($entry= $result->getFirstEntry()) do {
       $actual[]= $entry->getDN();
     } while ($entry= $result->getNextEntry());
@@ -113,5 +115,18 @@ class LDAPSearchResultTest extends \unittest\TestCase {
       new LDAPEntry($entries[0], []),
       (new LDAPSearchResult($this->newEntries($entries)))->getEntry(0)
     );
+  }
+
+  #[@test, @values([
+  #  [['cn=first,o=test']],
+  #  [['cn=first,o=test', 'cn=second,o=test']]
+  #])]
+  public function iteration_via_foreach($entries) {
+    $result= new LDAPSearchResult($this->newEntries($entries));
+    $actual= [];
+    foreach ($result as $entry) {
+      $actual[]= $entry->getDN();
+    }
+    $this->assertEquals($actual, $entries);
   }
 }
