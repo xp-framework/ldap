@@ -23,14 +23,14 @@ $l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
 $l->connect();
 $l->bind();
 
-$res= $l->search(
+$search= $l->search(
   'ou=People,dc=OpenLDAP,dc=Org', 
   '(objectClass=*)'
 );
   
-Console::writeLinef('===> %d entries found', $res->numEntries());
-while ($entry= $res->getNextEntry()) {
-  Console::writeLine('---> ', $entry->toString());
+Console::writeLinef('===> %d entries found', $search->numEntries());
+foreach ($search as $result) {
+  Console::writeLine('---> ', $result->toString());
 }
 
 $l->close();
