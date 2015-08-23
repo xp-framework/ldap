@@ -45,7 +45,7 @@ class LDAPSearchResultTest extends \unittest\TestCase {
 
   #[@test]
   public function no_first_entry() {
-    $this->assertFalse((new LDAPSearchResult($this->newEntries()))->getFirstEntry());
+    $this->assertNull((new LDAPSearchResult($this->newEntries()))->getFirstEntry());
   }
 
   #[@test, @values([
@@ -61,7 +61,7 @@ class LDAPSearchResultTest extends \unittest\TestCase {
 
   #[@test]
   public function no_next_entry() {
-    $this->assertFalse((new LDAPSearchResult($this->newEntries()))->getNextEntry());
+    $this->assertNull((new LDAPSearchResult($this->newEntries()))->getNextEntry());
   }
 
   #[@test, @values([
@@ -103,7 +103,7 @@ class LDAPSearchResultTest extends \unittest\TestCase {
 
   #[@test]
   public function no_entry_zero() {
-    $this->assertFalse((new LDAPSearchResult($this->newEntries()))->getEntry(0));
+    $this->assertNull((new LDAPSearchResult($this->newEntries()))->getEntry(0));
   }
 
   #[@test, @values([
