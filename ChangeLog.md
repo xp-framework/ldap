@@ -3,6 +3,8 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 6.1.0 / 2015-08-23
+
 * **Heads up**: Changed LDAPSearchResult's getFirstEntry(), getEntry() &
   getNextEntry() methods to return `NULL` instead of `FALSE` when EOF is
   reached. While technically this is a BC break, it does not break the
