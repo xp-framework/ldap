@@ -41,7 +41,7 @@ class LDAPEntries extends \lang\Object {
       return null;   // Nothing found
     } else {
       $this->iteration= [$entry, 1];
-      return new LDAPEntry(ldap_get_dn($this->conn, $entry), ldap_get_attributes($this->conn, $entry));
+      return LDAPEntry::create(ldap_get_dn($this->conn, $entry), ldap_get_attributes($this->conn, $entry));
     }
   }
   
@@ -72,7 +72,7 @@ class LDAPEntries extends \lang\Object {
     // Keep track how many etnries we have fetched so we stop once we
     // have reached this number - see above for explanation.
     $this->iteration= [$entry, ++$this->iteration[1]];
-    return new LDAPEntry(ldap_get_dn($this->conn, $entry), ldap_get_attributes($this->conn, $entry));
+    return LDAPEntry::create(ldap_get_dn($this->conn, $entry), ldap_get_attributes($this->conn, $entry));
   }
 
   /**

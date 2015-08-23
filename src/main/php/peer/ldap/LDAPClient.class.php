@@ -278,7 +278,7 @@ class LDAPClient extends \lang\Object {
       throw new LDAPException('Read "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
 
-    return LDAPEntry::fromResource($this->_hdl, ldap_first_entry($this->_hdl, $res));
+    return LDAPEntry::create(ldap_get_dn($this->conn, $res), ldap_get_attributes($this->conn, $res));
   }
   
   /**
