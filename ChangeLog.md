@@ -3,6 +3,11 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* **Heads up**: Changed LDAPSearchResult's getFirstEntry(), getEntry() &
+  getNextEntry() methods to return `NULL` instead of `FALSE` when EOF is
+  reached. While technically this is a BC break, it does not break the
+  iteration advertised in the README file. See xp-framework/ldap#4.
+  (@thekid)
 * Implemented xp-framework/ldap#3: LDAP entries iteration via `foreach`
   (@thekid)
 

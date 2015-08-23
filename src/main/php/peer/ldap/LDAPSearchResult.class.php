@@ -33,19 +33,19 @@ class LDAPSearchResult extends \lang\Object implements \Iterator {
   /**
    * Gets first entry
    *
-   * @return  peer.ldap.LDAPEntry or FALSE if nothing is found
+   * @return  peer.ldap.LDAPEntry or NULL if there is no first entry
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getFirstEntry() {
     $this->first= $this->entries->first();
-    return $this->first ?: false;
+    return $this->first;
   }
 
   /**
    * Get a search entry by resource
    *
    * @param   int offset
-   * @return  peer.ldap.LDAPEntry or FALSE if none exists by this offset
+   * @return  peer.ldap.LDAPEntry or NULL if none exists by this offset
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getEntry($offset) {
@@ -56,7 +56,7 @@ class LDAPSearchResult extends \lang\Object implements \Iterator {
       } while ($entry= $this->entries->next());
     }
     
-    return isset($this->all[$offset]) ? $this->all[$offset] : false;
+    return isset($this->all[$offset]) ? $this->all[$offset] : null;
   }
 
   /**
@@ -67,7 +67,7 @@ class LDAPSearchResult extends \lang\Object implements \Iterator {
    *   }
    * </code>
    *
-   * @return  peer.ldap.LDAPEntry or FALSE for EOF
+   * @return  peer.ldap.LDAPEntry or NULL for EOF
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getNextEntry() {
@@ -79,7 +79,7 @@ class LDAPSearchResult extends \lang\Object implements \Iterator {
       return $this->getFirstEntry();
     }
 
-    return $this->entries->next() ?: false;    
+    return $this->entries->next();    
   }
 
   /**
