@@ -8,7 +8,8 @@ use util\Objects;
  * @purpose  Represent a single entry
  * @see      xp://peer.ldap.LDAPSearchResult
  * @see      xp://peer.ldap.LDAPClient
- * @test     xp://net.xp_framework.unittest.peer.LDAPEntryTest
+ * @test     xp://peer.ldap.unittest.LDAPEntryTest
+ * @test     xp://peer.ldap.unittest.LDAPEntryCreateTest
  */
 class LDAPEntry extends \lang\Object {
   public
