@@ -274,11 +274,12 @@ class LDAPClient extends \lang\Object {
    */
   public function read(LDAPEntry $entry) {
     $res= ldap_read($this->_hdl, $entry->getDN(), 'objectClass=*', array(), false, 0);
-    if (0 != ldap_errno($this->_hdl)) {
+    if (LDAP_SUCCESS != ldap_errno($this->_hdl)) {
       throw new LDAPException('Read "'.$entry->getDN().'" failed', ldap_errno($this->_hdl));
     }
 
-    return LDAPEntry::create(ldap_get_dn($this->conn, $res), ldap_get_attributes($this->conn, $res));
+    $entry= ldap_first_entry($this->_hdl, $res);
+    return LDAPEntry::create(ldap_get_dn($this->_hdl, $entry), ldap_get_attributes($this->_hdl, $entry));
   }
   
   /**

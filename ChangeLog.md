@@ -3,6 +3,11 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 6.1.1 / 2015-08-24
+
+* Fixed `LDAPClient::read()` which was broken after refactoring
+  (@thekid)
+
 ## 6.1.0 / 2015-08-23
 
 * **Heads up**: Changed LDAPSearchResult's getFirstEntry(), getEntry() &
