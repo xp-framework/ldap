@@ -288,7 +288,7 @@ class LDAPQuery extends \lang\Object {
   public function toString() {
     $namelen= 0;
     
-    $str= $this->getClassName()."@{\n";
+    $str= nameof($this)."@{\n";
     foreach (array_keys(get_object_vars($this)) as $index) { $namelen= max($namelen, strlen($index)); }
     foreach (get_object_vars($this) as $name => $value) {
       if ('_' == $name{0}) continue;

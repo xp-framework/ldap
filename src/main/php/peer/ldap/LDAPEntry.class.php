@@ -133,7 +133,7 @@ class LDAPEntry extends \lang\Object {
    * @return  string
    */
   public function toString() {
-    $s= sprintf("%s@DN(%s){\n", $this->getClassName(), $this->getDN());
+    $s= sprintf("%s@DN(%s){\n", nameof($this), $this->getDN());
     foreach ($this->attributes as $name => $attr) {
       $s.= sprintf("  [%-20s] %s\n", $this->_ans[$name], implode(', ', $attr));
     }

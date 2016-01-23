@@ -101,7 +101,7 @@ class LDAPException extends \lang\XPException {
   public function compoundMessage() {
     return sprintf(
       'Exception %s (LDAP errorcode #%d [%s]: %s)',
-      $this->getClassName(),
+      nameof($this),
       $this->errorcode,
       ldap_err2str($this->errorcode),
       $this->message

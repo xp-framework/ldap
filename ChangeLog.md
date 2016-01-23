@@ -3,6 +3,12 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 6.1.2 / 2016-01-23
+
+* Fix code to use `nameof()` instead of the deprecated `getClassName()`
+  method from lang.Generic. See xp-framework/core#120
+  (@thekid)
+
 ## 6.1.1 / 2015-08-24
 
 * Fixed `LDAPClient::read()` which was broken after refactoring
