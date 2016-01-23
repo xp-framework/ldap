@@ -3,8 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 6.1.2 / 2016-01-23
+## 6.2.0 / 2016-01-23
 
+* **Heads up**: Change minimum XP version required to *6.3.0*.
+  (@thekid)
 * Fix code to use `nameof()` instead of the deprecated `getClassName()`
   method from lang.Generic. See xp-framework/core#120
   (@thekid)
