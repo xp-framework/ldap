@@ -5,6 +5,7 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 7.0.0 / 2016-02-22
 
+* **Adopted semantic versioning. See xp-framework/rfc#300** - @thekid 
 * Added version compatibility with XP 7 - @thekid
 * **Heads up**: Changed minimum XP version to XP 6.5.0, and with it the
   minimum PHP version to PHP 5.5.
