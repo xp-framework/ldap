@@ -15,13 +15,11 @@ Example (LDAP search)
 ---------------------
 
 ```php
-use peer\ldap\LDAPClient;
+use peer\ldap\LDAPConnection;
 use util\cmd\Console;
 
-$l= new LDAPClient('ldap.openldap.org');
-$l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
+$l= new LDAPConnection('ldap://ldap.example.com');
 $l->connect();
-$l->bind();
 
 $search= $l->search(
   'ou=People,dc=OpenLDAP,dc=Org', 
@@ -40,13 +38,11 @@ Example (Modifying an entry)
 ----------------------------
 
 ```php
-use peer\ldap\LDAPClient;
+use peer\ldap\LDAPConnection;
 use peer\ldap\LDAPEntry;
 
-$l= new LDAPClient('ldap.example.com');
-$l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
+$l= new LDAPConnection('ldap://uid=admin,o=roles,dc=planet-xp,dc=net:password@ldap.example.com');
 $l->connect();
-$l->bind('uid=admin,o=roles,dc=planet-xp,dc=net', 'password');
 
 with ($entry= $l->read(new LDAPEntry('uid=1549,o=people,dc=planet-xp,dc=net'))); {
   $entry->setAttribute('firstname', 'Timm');
@@ -61,13 +57,11 @@ Example (Adding an entry)
 -------------------------
 
 ```php
-use peer\ldap\LDAPClient;
+use peer\ldap\LDAPConnection;
 use peer\ldap\LDAPEntry;
 
-$l= new LDAPClient('ldap.example.com');
-$l->setOption(LDAP_OPT_PROTOCOL_VERSION, 3);
+$l= new LDAPConnection('ldap://uid=admin,o=roles,dc=planet-xp,dc=net:password@ldap.example.com');
 $l->connect();
-$l->bind('uid=admin,o=roles,dc=planet-xp,dc=net', 'password');
 
 with ($entry= new LDAPEntry('uid=1549,o=people,dc=planet-xp,dc=net')); {
   $entry->setAttribute('uid', 1549);
