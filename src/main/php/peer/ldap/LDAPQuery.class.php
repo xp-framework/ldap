@@ -6,17 +6,20 @@
  * @see     xp://peer.ldap.LDAPClient
  * @see     rfc://2254
  * @test    xp://net.xp_framework.unittest.peer.LDAPQueryTest
- * @purpose Wrap LDAP queries
  */
 class LDAPQuery extends \lang\Object {
-  const RECEIVE_TYPES=  1;
-  const RECEIVE_VALUES= 0;
+  const RECEIVE_TYPES  = 1;
+  const RECEIVE_VALUES = 0;
+
+  const SCOPE_BASE     = 0x0000;
+  const SCOPE_ONELEVEL = 0x0001;
+  const SCOPE_SUB      = 0x0002;
 
   public
     $filter=      '',
     $scope=       0,
     $base=        '',
-    $attrs=       array(),
+    $attrs=       [],
     $attrsOnly=   self::RECEIVE_VALUES,
     $sizelimit=   0,
     $timelimit=   0,
