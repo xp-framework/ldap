@@ -41,6 +41,7 @@ use peer\ConnectException;
  *   $l->close();
  * </code>
  *
+ * @deprecated Use LDAPConnection instead
  * @see      php://ldap
  * @see      http://developer.netscape.com/docs/manuals/directory/41/ag/
  * @see      http://developer.netscape.com/docs/manuals/dirsdk/jsdk40/contents.htm
