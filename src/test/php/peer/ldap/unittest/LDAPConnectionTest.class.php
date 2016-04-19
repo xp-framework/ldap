@@ -11,6 +11,8 @@ class LDAPConnectionTest extends \unittest\TestCase {
     return [
       ['ldap://example.com'],
       ['ldap://example.com:389'],
+      ['ldaps://example.com'],
+      ['ldaps://example.com:636'],
       ['ldap://bind-dn:password@example.com'],
       ['ldap://bind-dn:password@example.com:389'],
       ['ldap://example.com/?protocol_version=2'],

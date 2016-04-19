@@ -72,16 +72,24 @@ class LDAPConnection extends \lang\Object {
    * @throws  peer.ConnectException
    */
   public function connect() {
+    static $ports= ['ldap' => 389, 'ldaps' => 636];
+
     if ($this->isConnected()) return true;
 
-    if (false === ($this->handle= ldap_connect($this->url->getHost(), $this->url->getPort(389)))) {
-      throw new ConnectException('Cannot connect to '.$this->url->getHost().':'.$this->url->getPort(389));
+    $uri= sprintf(
+      '%s://%s:%d',
+      $this->url->getScheme(),
+      $this->url->getHost(),
+      $this->url->getPort($ports[$this->url->getScheme()])
+    );
+    if (false === ($this->handle= ldap_connect($uri))) {
+      throw new ConnectException('Cannot connect to '.$uri);
     }
     
     if (false === ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null))) {
       switch ($error= ldap_errno($this->handle)) {
         case -1: case LDAP_SERVER_DOWN:
-          throw new ConnectException('Cannot connect to '.$this->url->getHost().':'.$this->url->getPort(389));
+          throw new ConnectException('Cannot connect to '.$uri);
         
         default:
           throw new LDAPException('Cannot bind for "'.$this->url->getUser(null).'"', $error);
