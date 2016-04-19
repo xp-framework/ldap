@@ -68,8 +68,8 @@ class LDAPConnection extends \lang\Object {
   /**
    * Connect to the LDAP server
    *
-   * @return  resource LDAP resource handle
-   * @throws  peer.ConnectException
+   * @return self $this
+   * @throws peer.ConnectException
    */
   public function connect() {
     static $ports= ['ldap' => 389, 'ldaps' => 636];
@@ -112,7 +112,7 @@ class LDAPConnection extends \lang\Object {
   /**
    * Checks whether the connection is open
    *
-   * @return  bool
+   * @return bool
    */
   public function isConnected() {
     return is_resource($this->handle);
