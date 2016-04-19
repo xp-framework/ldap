@@ -3,6 +3,11 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 7.1.0 / 2016-04-19
+
+* Implemented xp-framework/rfc#147: new LDAP API. See pull request #5
+  (@thekid)
+
 ## 7.0.0 / 2016-02-22
 
 * **Adopted semantic versioning. See xp-framework/rfc#300** - @thekid 
