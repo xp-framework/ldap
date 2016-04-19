@@ -90,7 +90,7 @@ class LDAPConnection extends \lang\Object {
       if (!self::$options[$option]($this->handle, $value)) {
         ldap_unbind($this->handle);
         $this->handle= null;
-        throw new LDAPException('Cannot set value "'.$option.'"', ldap_errno($this->handle));
+        throw new LDAPException('Cannot set option "'.$option.'"', ldap_errno($this->handle));
       }
     }
 
