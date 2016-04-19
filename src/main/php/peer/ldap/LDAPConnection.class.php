@@ -85,7 +85,15 @@ class LDAPConnection extends \lang\Object {
     if (false === ($this->handle= ldap_connect($uri))) {
       throw new ConnectException('Cannot connect to '.$uri);
     }
-    
+
+    foreach (array_merge(['protocol_version' => 3], $this->url->getParam('options')) as $option => $value) {
+      if (!self::$options[$option]($this->handle, $value)) {
+        ldap_unbind($this->handle);
+        $this->handle= null;
+        throw new LDAPException('Cannot set value "'.$option.'"', ldap_errno($this->handle));
+      }
+    }
+
     if (false === ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null))) {
       switch ($error= ldap_errno($this->handle)) {
         case -1: case LDAP_SERVER_DOWN:
@@ -93,14 +101,6 @@ class LDAPConnection extends \lang\Object {
         
         default:
           throw new LDAPException('Cannot bind for "'.$this->url->getUser(null).'"', $error);
-      }
-    }
-
-    foreach (array_merge(['protocol_version' => 3], $this->url->getParam('options')) as $option => $value) {
-      if (!self::$options[$option]($this->handle, $value)) {
-        ldap_unbind($this->handle);
-        $this->handle= null;
-        throw new LDAPException('Cannot set value "'.$option.'"', ldap_errno($this->handle));
       }
     }
 
