@@ -111,10 +111,12 @@ class LDAPQuery extends \lang\Object {
    * Set Filter
    *
    * @param   string filter
+   * @return  self $this
    */
   public function setFilter() {
     $args= func_get_args();
     $this->filter= $this->_prepare($args);
+    return $this;
   }
 
   /**
@@ -130,9 +132,11 @@ class LDAPQuery extends \lang\Object {
    * Set Scope
    *
    * @param   int scope
+   * @return  self $this
    */
   public function setScope($scope) {
     $this->scope= $scope;
+    return $this;
   }
 
   /**
@@ -148,10 +152,12 @@ class LDAPQuery extends \lang\Object {
    * Set Base
    *
    * @param   var[] args
+   * @return  self $this
    */
   public function setBase() {
     $args= func_get_args();
     $this->base= $this->_prepare($args);
+    return $this;
   }
 
   /**
@@ -176,9 +182,11 @@ class LDAPQuery extends \lang\Object {
    * Set Attrs
    *
    * @param   var[] attrs
+   * @return  self $this
    */
   public function setAttrs($attrs) {
     $this->attrs= $attrs;
+    return $this;
   }
 
   /**
@@ -194,9 +202,11 @@ class LDAPQuery extends \lang\Object {
    * Set whether to return only attribute types.
    *
    * @param  bool mode
+   * @return  self $this
    */
   public function setAttrsOnly($mode) {
     $this->attrsOnly= $mode;
+    return $this;
   }
 
   /**
@@ -212,9 +222,11 @@ class LDAPQuery extends \lang\Object {
    * Set Sizelimit
    *
    * @param   int sizelimit
+   * @return  self $this
    */
   public function setSizelimit($sizelimit) {
     $this->sizelimit= $sizelimit;
+    return $this;
   }
 
   /**
@@ -230,9 +242,11 @@ class LDAPQuery extends \lang\Object {
    * Set Timelimit
    *
    * @param   int timelimit
+   * @return  self $this
    */
   public function setTimelimit($timelimit) {
     $this->timelimit= $timelimit;
+    return $this;
   }
 
   /**
@@ -251,9 +265,11 @@ class LDAPQuery extends \lang\Object {
    *
    * @see     php://ldap_sort
    * @param   string[] sort array of fields to sort with
+   * @return  self $this
    */
   public function setSort($sort) {
     $this->sort= $sort;
+    return $this;
   }
 
   /**
@@ -269,8 +285,10 @@ class LDAPQuery extends \lang\Object {
    * Set Deref
    *
    * @param   bool deref
+   * @return  self $this
    */
   public function setDeref($deref) {
+    return $this;
     $this->deref= $deref;
   }
 
