@@ -95,6 +95,8 @@ class LDAPConnection extends \lang\Object {
     }
 
     if (false === ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null))) {
+      ldap_unbind($this->handle);
+      $this->handle= null;
       switch ($error= ldap_errno($this->handle)) {
         case -1: case LDAP_SERVER_DOWN:
           throw new ConnectException('Cannot connect to '.$uri);
