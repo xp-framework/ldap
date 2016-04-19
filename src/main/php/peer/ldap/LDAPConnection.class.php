@@ -3,7 +3,7 @@
 use peer\ConnectException;
 use peer\URL;
 use lang\XPClass;
-use lang\lang\IllegalArgumentException;
+use lang\IllegalArgumentException;
 
 /**
  * LDAP connection
@@ -20,24 +20,49 @@ use lang\lang\IllegalArgumentException;
  * @see   rfc://2255
  * @see   rfc://2256
  * @ext   ldap
- * @test  xp://net.xp_framework.unittest.peer.LDAPTest
+ * @test  xp://peer.ldap.unittest.LDAPConnectionTest
  */
 class LDAPConnection extends \lang\Object {
+  private static $options;
+
   private $url;
   private $handle= null;
 
   static function __static() {
     XPClass::forName('peer.ldap.LDAPException');  // Error codes
+    self::$options= [
+      'deref' => function($handle, $value) {
+        return ldap_set_option($this->handle, LDAP_OPT_DEREF, constant('LDAP_DEREF_'.strtoupper($value)));
+      },
+      'sizelimit' => function($handle, $value) {
+        return ldap_set_option($this->handle, LDAP_OPT_SIZELIMIT, (int)$value);
+      },
+      'timelimit' => function($handle, $value) {
+        return ldap_set_option($this->handle, LDAP_OPT_TIMELIMIT, (int)$value);
+      },
+      'network_timeout' => function($handle, $value) {
+        return ldap_set_option($this->handle, LDAP_OPT_NETWORK_TIMEOUT, (int)$value);
+      },
+      'protocol_version' => function($handle, $value) {
+        return ldap_set_option($this->handle, LDAP_OPT_PROTOCOL_VERSION, (int)$value);
+      },
+    ];
   }
 
   /**
    * Create a new connection from a given DSN of the form:
    * `ldap://user:pass@host:port/?options[protocol_version]=2`
    *
-   * @param   string|peer.URL $dsn
+   * @param  string|peer.URL $dsn
+   * @throws lang.IllegalArgumentException when DSN is malformed
    */
   public function __construct($dsn) {
     $this->url= $dsn instanceof URL ? $dsn : new URL($dsn);
+    foreach ($this->url->getParams() as $option => $value) {
+      if (!isset(self::$options[$option])) {
+        throw new IllegalArgumentException('Unknown option "'.$option.'"');
+      }
+    }
   }
 
   /**
@@ -64,7 +89,7 @@ class LDAPConnection extends \lang\Object {
     }
 
     foreach (array_merge(['protocol_version' => 3], $this->url->getParam('options')) as $option => $value) {
-      if (false === ldap_set_option($this->handle, constant('LDAP_OPT_'.strtoupper($option), $value))) {
+      if (!self::$options[$option]($this->handle, $value)) {
         ldap_unbind($this->handle);
         $this->handle= null;
         throw new LDAPException('Cannot set value "'.$option.'"', ldap_errno($this->handle));
