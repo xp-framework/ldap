@@ -32,19 +32,19 @@ class LDAPConnection extends \lang\Object {
     XPClass::forName('peer.ldap.LDAPException');  // Error codes
     self::$options= [
       'deref' => function($handle, $value) {
-        return ldap_set_option($this->handle, LDAP_OPT_DEREF, constant('LDAP_DEREF_'.strtoupper($value)));
+        return ldap_set_option($handle, LDAP_OPT_DEREF, constant('LDAP_DEREF_'.strtoupper($value)));
       },
       'sizelimit' => function($handle, $value) {
-        return ldap_set_option($this->handle, LDAP_OPT_SIZELIMIT, (int)$value);
+        return ldap_set_option($handle, LDAP_OPT_SIZELIMIT, (int)$value);
       },
       'timelimit' => function($handle, $value) {
-        return ldap_set_option($this->handle, LDAP_OPT_TIMELIMIT, (int)$value);
+        return ldap_set_option($handle, LDAP_OPT_TIMELIMIT, (int)$value);
       },
       'network_timeout' => function($handle, $value) {
-        return ldap_set_option($this->handle, LDAP_OPT_NETWORK_TIMEOUT, (int)$value);
+        return ldap_set_option($handle, LDAP_OPT_NETWORK_TIMEOUT, (int)$value);
       },
       'protocol_version' => function($handle, $value) {
-        return ldap_set_option($this->handle, LDAP_OPT_PROTOCOL_VERSION, (int)$value);
+        return ldap_set_option($handle, LDAP_OPT_PROTOCOL_VERSION, (int)$value);
       },
     ];
   }
@@ -86,8 +86,9 @@ class LDAPConnection extends \lang\Object {
       throw new ConnectException('Cannot connect to '.$uri);
     }
 
-    foreach (array_merge(['protocol_version' => 3], $this->url->getParam('options')) as $option => $value) {
-      if (!self::$options[$option]($this->handle, $value)) {
+    foreach (array_merge(['protocol_version' => 3], $this->url->getParams()) as $option => $value) {
+      $set= self::$options[$option];
+      if (!$set($this->handle, $value)) {
         ldap_unbind($this->handle);
         $this->handle= null;
         throw new LDAPException('Cannot set option "'.$option.'"', ldap_errno($this->handle));
@@ -95,9 +96,10 @@ class LDAPConnection extends \lang\Object {
     }
 
     if (false === ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null))) {
+      $error= ldap_errno($this->handle);
       ldap_unbind($this->handle);
       $this->handle= null;
-      switch ($error= ldap_errno($this->handle)) {
+      switch ($error) {
         case -1: case LDAP_SERVER_DOWN:
           throw new ConnectException('Cannot connect to '.$uri);
         

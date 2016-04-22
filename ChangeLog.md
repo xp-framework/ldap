@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 7.1.1 / 2016-04-22
+
+* Fixed LDAP options not being correctly set in `connect()` - @thekid
+
 ## 7.1.0 / 2016-04-19
 
 * Implemented xp-framework/rfc#147: new LDAP API. See pull request #5
