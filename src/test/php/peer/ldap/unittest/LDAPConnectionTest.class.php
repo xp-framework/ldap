@@ -34,4 +34,9 @@ class LDAPConnectionTest extends \unittest\TestCase {
   public function unknown_option() {
     new LDAPConnection('ldap://example.com/?unkown=value');
   }
+
+  #[@test]
+  public function dsn() {
+    $this->assertEquals(new URL('ldap://example.com'), (new LDAPConnection('ldap://example.com'))->dsn());
+  }
 }
