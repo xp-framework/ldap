@@ -65,6 +65,9 @@ class LDAPConnection extends \lang\Object {
     }
   }
 
+  /** @return peer.URL */
+  public function dsn() { return $this->url; }
+
   /**
    * Connect to the LDAP server
    *
