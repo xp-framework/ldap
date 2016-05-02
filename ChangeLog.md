@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 7.2.0 / 2016-05-02
+
+* Merged PR #6: Add accessor for underlying connection DSN - @thekid
+
 ## 7.1.1 / 2016-04-22
 
 * Fixed LDAP options not being correctly set in `connect()` - @thekid
