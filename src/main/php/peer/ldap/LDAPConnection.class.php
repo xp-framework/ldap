@@ -216,7 +216,7 @@ class LDAPConnection extends \lang\Object {
       $filter->getTimelimit(),
       $filter->getDeref()
     ))) {
-      throw throw $this->error('Search failed');
+      throw $this->error('Search failed');
     }
 
     // Sort results by given sort attributes
