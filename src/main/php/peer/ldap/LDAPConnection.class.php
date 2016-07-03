@@ -202,7 +202,7 @@ class LDAPConnection extends \lang\Object {
     ];
     
     if (!isset($methods[$filter->getScope()])) {
-      throw new \lang\IllegalArgumentException('Scope '.$args[0].' not supported');
+      throw new IllegalArgumentException('Scope '.$filter->getScope().' not supported');
     }
 
     $f= $methods[$filter->getScope()];
