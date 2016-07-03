@@ -3,6 +3,9 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 7.3.0 / 2016-07-03
+
+* Merged PR #8: Detect disconnects - @thekid
 * Extended `connect()` to optionally accept DN and password with which
   to bind for instead of the credentials passed in the connection DSN.
   (@thekid)
