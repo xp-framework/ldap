@@ -84,6 +84,7 @@ class provides a printf-style syntax to do so:
 use peer\ldap\LDAPQuery;
 
 $res= $ldap->searchBy(new LDAPQuery(
+  'o=people,dc=planet-xp,dc=net',
   '(&(objectClass=%c)(|(username=%s)(uid=%d)))',
   'xpPerson',
   'friebe'
