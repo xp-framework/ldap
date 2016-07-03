@@ -4,6 +4,7 @@ use peer\ConnectException;
 use peer\URL;
 use lang\XPClass;
 use lang\IllegalArgumentException;
+use util\Secret;
 
 /**
  * LDAP connection
@@ -69,12 +70,15 @@ class LDAPConnection extends \lang\Object {
   public function dsn() { return $this->url; }
 
   /**
-   * Connect to the LDAP server
+   * Connect to the LDAP server. Optionally takes DN and password which
+   * overwrite any credentials given in the connection DSN.
    *
+   * @param  string $dn
+   * @param  util.Secret $password
    * @return self $this
    * @throws peer.ConnectException
    */
-  public function connect() {
+  public function connect($dn= null, Secret $password= null) {
     static $ports= ['ldap' => 389, 'ldaps' => 636];
 
     if ($this->isConnected()) return true;
@@ -98,7 +102,12 @@ class LDAPConnection extends \lang\Object {
       }
     }
 
-    if (false === ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null))) {
+    if (null === $dn) {
+      $result= ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null));
+    } else {
+      $result= ldap_bind($this->handle, $dn, $password->reveal());
+    }
+    if (false === $result) {
       $error= ldap_errno($this->handle);
       ldap_unbind($this->handle);
       $this->handle= null;

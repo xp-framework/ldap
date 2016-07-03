@@ -3,6 +3,9 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Extended `connect()` to optionally accept DN and password with which
+  to bind for instead of the credentials passed in the connection DSN.
+  (@thekid)
 * Rewrote search() and searchBy() internally without the need for
   `call_user_func_array()`.
   (@thekid)
