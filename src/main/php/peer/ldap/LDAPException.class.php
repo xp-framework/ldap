@@ -84,15 +84,6 @@ class LDAPException extends \lang\XPException {
   }
 
   /**
-   * Check whether a disconnect was received
-   *
-   * @return  bool
-   */
-  public function disconnected() {
-    return LDAP_SERVER_DOWN === $this->errorcode || -1 === $this->errorcode;
-  }
-
-  /**
    * Get errorcode
    *
    * @return  int

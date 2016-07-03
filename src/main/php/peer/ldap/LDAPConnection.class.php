@@ -153,8 +153,10 @@ class LDAPConnection extends \lang\Object {
     if (LDAP_SERVER_DOWN === $error || -1 === $error) {
       ldap_unbind($this->handle);
       $this->handle= null;
+      return new LDAPDisconnected($message, $error);
+    } else {
+      return new LDAPException($message, $error);
     }
-    return new LDAPException($message, $error);
   }
 
   /**
