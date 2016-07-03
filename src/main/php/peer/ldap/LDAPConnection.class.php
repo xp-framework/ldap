@@ -138,7 +138,7 @@ class LDAPConnection extends \lang\Object {
   /**
    * Perform an LDAP search with scope LDAP_SCOPE_SUB
    *
-   * @param   string base_dn
+   * @param   string base
    * @param   string filter
    * @param   array attributes default []
    * @param   int attrsonly default 0,
@@ -149,10 +149,17 @@ class LDAPConnection extends \lang\Object {
    * @throws  peer.ldap.LDAPException
    * @see     php://ldap_search
    */
-  public function search() {
-    $args= func_get_args();
-    array_unshift($args, $this->handle);
-    if (false === ($res= call_user_func_array('ldap_search', $args))) {
+  public function search($base, $filter, $attributes, $attrsonly, $sizelimit, $timelimit, $deref) {
+    if (false === ($res= ldap_search(
+      $this->handle,
+      $base,
+      $filter,
+      $attrs,
+      $attrsOnly,
+      $sizeLimit,
+      $timelimit,
+      $deref
+    ))) {
       throw new LDAPException('Search failed', ldap_errno($this->handle));
     }
     
@@ -172,11 +179,12 @@ class LDAPConnection extends \lang\Object {
       LDAPQuery::SCOPE_SUB      => 'ldap_search'
     ];
     
-    if (!isset($methods[$filter->getScope()]))
+    if (!isset($methods[$filter->getScope()])) {
       throw new \lang\IllegalArgumentException('Scope '.$args[0].' not supported');
-    
-    if (false === ($res= @call_user_func_array(
-      $methods[$filter->getScope()], array(
+    }
+
+    $f= $methods[$filter->getScope()];
+    if (false === ($res= $f(
       $this->handle,
       $filter->getBase(),
       $filter->getFilter(),
@@ -185,7 +193,7 @@ class LDAPConnection extends \lang\Object {
       $filter->getSizeLimit(),
       $filter->getTimelimit(),
       $filter->getDeref()
-    )))) {
+    ))) {
       throw new LDAPException('Search failed', ldap_errno($this->handle));
     }
 

@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Rewrote search() and searchBy() internally without the need for
+  `call_user_func_array()`.
+  (@thekid)
+
 ## 7.2.0 / 2016-05-02
 
 * Merged PR #6: Add accessor for underlying connection DSN - @thekid
