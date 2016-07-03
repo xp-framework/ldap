@@ -70,8 +70,7 @@ define('LDAP_REFERRAL_LIMIT_EXCEEDED',         0x0061);
  * @see      http://developer.netscape.com/docs/manuals/dirsdk/jsdk40/Reference/netscape/ldap/LDAPException.html
  */
 class LDAPException extends \lang\XPException {
-  public
-    $errorcode = 0;
+  public $errorcode;
     
   /**
    * Constructor
@@ -82,6 +81,15 @@ class LDAPException extends \lang\XPException {
   public function __construct($message, $errorcode) {
     parent::__construct($message);
     $this->errorcode= $errorcode;
+  }
+
+  /**
+   * Check whether a disconnect was received
+   *
+   * @return  bool
+   */
+  public function disconnected() {
+    return LDAP_SERVER_DOWN === $this->errorcode || -1 === $this->errorcode;
   }
 
   /**
