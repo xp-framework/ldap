@@ -182,7 +182,7 @@ class LDAPConnection extends \lang\Object {
       $timelimit,
       $deref
     ))) {
-      $this->error('Search failed');
+      throw $this->error('Search failed');
     }
     
     return new LDAPSearchResult(new LDAPEntries($this->handle, $res));
@@ -216,7 +216,7 @@ class LDAPConnection extends \lang\Object {
       $filter->getTimelimit(),
       $filter->getDeref()
     ))) {
-      throw $this->error('Search failed');
+      throw throw $this->error('Search failed');
     }
 
     // Sort results by given sort attributes
@@ -237,7 +237,7 @@ class LDAPConnection extends \lang\Object {
   public function read(LDAPEntry $entry) {
     $res= ldap_read($this->handle, $entry->getDN(), 'objectClass=*', [], false, 0);
     if (LDAP_SUCCESS != ldap_errno($this->handle)) {
-      $this->error('Read "'.$entry->getDN().'" failed');
+      throw $this->error('Read "'.$entry->getDN().'" failed');
     }
 
     $entry= ldap_first_entry($this->handle, $res);
@@ -260,7 +260,7 @@ class LDAPConnection extends \lang\Object {
     
     // Check for other errors
     if (LDAP_SUCCESS != ldap_errno($this->handle)) {
-      $this->error('Read "'.$entry->getDN().'" failed');
+      throw $this->error('Read "'.$entry->getDN().'" failed');
     }
     
     // No errors occurred, requested object exists
@@ -284,7 +284,7 @@ class LDAPConnection extends \lang\Object {
       $entry->getDN(), 
       $entry->getAttributes()
     ))) {
-      $this->error('Add for "'.$entry->getDN().'" failed');
+      throw $this->error('Add for "'.$entry->getDN().'" failed');
     }
     
     return $res;
@@ -307,7 +307,7 @@ class LDAPConnection extends \lang\Object {
       $entry->getDN(),
       $entry->getAttributes()
     ))) {
-      $this->error('Modify for "'.$entry->getDN().'" failed');
+      throw $this->error('Modify for "'.$entry->getDN().'" failed');
     }
     
     return $res;
@@ -326,7 +326,7 @@ class LDAPConnection extends \lang\Object {
       $this->handle,
       $entry->getDN()
     ))) {
-      $this->error('Delete for "'.$entry->getDN().'" failed');
+      throw $this->error('Delete for "'.$entry->getDN().'" failed');
     }
     
     return $res;
@@ -346,7 +346,7 @@ class LDAPConnection extends \lang\Object {
       $entry->getDN(),
       [$name => $value]
     ))) {
-      $this->error('Add attribute for "'.$entry->getDN().'" failed');
+      throw $this->error('Add attribute for "'.$entry->getDN().'" failed');
     }
     
     return $res;
@@ -365,7 +365,7 @@ class LDAPConnection extends \lang\Object {
       $entry->getDN(),
       $name
     ))) {
-      $this->error('Delete attribute for "'.$entry->getDN().'" failed');
+      throw $this->error('Delete attribute for "'.$entry->getDN().'" failed');
     }
     
     return $res;
@@ -385,7 +385,7 @@ class LDAPConnection extends \lang\Object {
       $entry->getDN(),
       [$name => $value]
     ))) {
-      $this->error('Replace attribute for "'.$entry->getDN().'" failed');
+      throw $this->error('Replace attribute for "'.$entry->getDN().'" failed');
     }
     
     return $res;
