@@ -158,7 +158,7 @@ class LDAPConnection extends \lang\Object {
    * @throws  peer.ldap.LDAPException
    * @see     php://ldap_search
    */
-  public function search($base, $filter, $attributes, $attrsonly, $sizelimit, $timelimit, $deref) {
+  public function search($base, $filter, $attributes= [], $attrsonly= 0, $sizelimit= 0, $timelimit= 0, $deref= LDAP_DEREF_NEVER) {
     if (false === ($res= ldap_search(
       $this->handle,
       $base,
