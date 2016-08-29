@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 7.4.1 / 2016-08-29
+
+* Made compatible with xp-framework/network v8.0.0 - @thekid
+
 ## 7.4.0 / 2016-08-28
 
 * Added forward compatibility with XP 8.0.0 - @thekid
