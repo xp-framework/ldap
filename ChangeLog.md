@@ -5,7 +5,7 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 7.4.2 / 2016-09-17
 
-* Fixed "undefined variable attrs" - @thekid
+* Fixed "undefined variable attrs" in `LDAPConnection::search()` - @thekid
 
 ## 7.4.1 / 2016-08-29
 
