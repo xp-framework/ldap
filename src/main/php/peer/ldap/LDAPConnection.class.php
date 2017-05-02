@@ -114,7 +114,7 @@ class LDAPConnection extends \lang\Object {
       if (LDAP_SERVER_DOWN === $error || -1 === $error) {
         throw new ConnectException('Cannot connect to '.$uri);
       } else {
-        throw new LDAPException('Cannot bind for "'.($user ?: $this->url->getUser(null)).'"', $error);
+        throw new LDAPException('Cannot bind for "'.($dn ?: $this->url->getUser(null)).'"', $error);
       }
     }
 
