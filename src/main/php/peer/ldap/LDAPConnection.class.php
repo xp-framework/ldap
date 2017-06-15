@@ -221,11 +221,13 @@ class LDAPConnection {
       throw $this->error('Search failed');
     }
 
-    // Sort results by given sort attributes
-    if ($filter->getSort()) foreach ($filter->getSort() as $sort) {
-      ldap_sort($this->handle, $res, $sort);
+    if ($sort= $filter->getSort()) {
+      $entries= new SortedLDAPEntries($this->handle, $res, $sort);
+    } else {
+      $entries= new LDAPEntries($this->handle, $res);
     }
-    return new LDAPSearchResult(new LDAPEntries($this->handle, $res));
+
+    return new LDAPSearchResult($entries);
   }
   
   /**
