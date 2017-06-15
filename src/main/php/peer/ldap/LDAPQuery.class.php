@@ -5,7 +5,7 @@ use util\Objects;
 /**
  * Class encapsulating LDAP queries.
  *
- * @see     xp://peer.ldap.LDAPClient
+ * @see     xp://peer.ldap.LDAPConnection#searchBy
  * @see     rfc://2254
  * @test    xp://net.xp_framework.unittest.peer.LDAPQueryTest
  */
@@ -25,7 +25,7 @@ class LDAPQuery implements \lang\Value {
     $attrsOnly=   self::RECEIVE_VALUES,
     $sizelimit=   0,
     $timelimit=   0,
-    $sort=        false,
+    $sort=        [],
     $deref=       false;
     
   /**
@@ -77,7 +77,7 @@ class LDAPQuery implements \lang\Value {
       if ($args[$ofs] instanceof \util\Date) {
         $tok{$mod}= 's';
         $arg= $args[$ofs]->toString('YmdHi\\ZO');
-      } else if ($args[$ofs] instanceof \lang\Generic) {
+      } else if ($args[$ofs] instanceof \lang\Value) {
         $arg= $args[$ofs]->toString();
       } else {
         $arg= $args[$ofs];
@@ -302,37 +302,36 @@ class LDAPQuery implements \lang\Value {
   public function getDeref() {
     return $this->deref;
   }
-  
+
   /**
    * Return a nice string representation of this object.
    *
    * @return  string
    */
   public function toString() {
-    $namelen= 0;
-    
-    $str= nameof($this)."@{\n";
-    foreach (array_keys(get_object_vars($this)) as $index) { $namelen= max($namelen, strlen($index)); }
-    foreach (get_object_vars($this) as $name => $value) {
-      if ('_' == $name{0}) continue;
-    
-      // Nicely convert certain types
-      if (is_bool($value)) $value= $value ? 'TRUE' : 'FALSE';
-      if (is_array($value)) $value= implode(', ', $value);
-      
-      if ('scope' == $name) switch ($value) {
-        case LDAPClient::SCOPE_BASE: $value= 'LDAP_SCOPE_BASE'; break;
-        case LDAPClient::SCOPE_ONELEVEL: $value= 'LDAP_SCOPE_ONELEVEL'; break;
-        case LDAPClient::SCOPE_SUB: $value= 'LDAP_SCOPE_SUB'; break;
-      }
-      
-      $str.= sprintf("  [%-".($namelen+5)."s] %s\n",
-        $name,
-        $value
-      );
-    }
-    
-    return $str."}\n";
+    return sprintf(
+      "%s@{\n".
+      "  [filter        ] %s\n".
+      "  [scope         ] %s\n".
+      "  [base          ] %s\n".
+      "  [attrs         ] %s\n".
+      "  [attrsOnly     ] %s\n".
+      "  [sizelimit     ] %s\n".
+      "  [timelimit     ] %s\n".
+      "  [sort          ] %s\n".
+      "  [deref         ] %s\n".
+      "}",
+      nameof($this),
+      $this->filter,
+      $this->scope,
+      $this->base,
+      Objects::stringOf($this->attrs),
+      $this->attrsOnly  ? 'true' : 'false',
+      $this->sizelimit,
+      $this->timelimit,
+      implode(', ', $this->sort),
+      $this->deref ? 'true' : 'false'
+    );
   }
 
   /**

@@ -137,7 +137,7 @@ class LDAPEntry implements \lang\Value {
     foreach ($this->attributes as $name => $attr) {
       $s.= sprintf("  [%-20s] %s\n", $this->_ans[$name], implode(', ', $attr));
     }
-    return $s."}\n";
+    return $s.'}';
   }
 
   /**
