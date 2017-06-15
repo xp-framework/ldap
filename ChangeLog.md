@@ -5,8 +5,12 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 8.0.0 / 2017-06-15
 
+* Fixed issue #9: *Function ldap_sort() is deprecated* by implementing
+  sorting in userland. See PR #19
+  (@thekid)
 * **Heads up**: Removed deprecated peer.ldap.LDAPClient class. Use the
   new peer.ldap.LDAPConnection class introduced with PR #5 in April 2016
+  (@thekid)
 * Added forward compatibility with XP 9.0.0 - @thekid
 
 ## 7.4.3 / 2017-05-02
