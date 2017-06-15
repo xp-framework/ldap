@@ -5,6 +5,8 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 8.0.0 / 2017-06-15
 
+* **Heads up:** Dropped PHP 5.5 support - now requires PHP 5.6 minimum!
+  (@thekid)
 * Fixed issue #9: *Function ldap_sort() is deprecated* by implementing
   sorting in userland. See PR #19
   (@thekid)
