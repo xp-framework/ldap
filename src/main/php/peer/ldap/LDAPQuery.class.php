@@ -31,22 +31,20 @@ class LDAPQuery implements \lang\Value {
   /**
    * Constructor.
    *
-   * @param   string base
-   * @param   var[] args
+   * @param  string $base
+   * @param  var... $args
    */
-  public function __construct() {
-    $args= func_get_args();
-    
-    $this->base= array_shift($args);
-    if (sizeof ($args)) $this->filter= $this->_prepare($args);
+  public function __construct($base= null, ... $args) {
+    $this->base= $base;
+    $this->filter= $args ? $this->_prepare($args) : '';
   }
 
   /**
    * Format the query as requested by the format identifiers. Values are escaped
    * approriately, so they're safe to use in the query.
    *
-   * @param   var[] args
-   * @return  string filter
+   * @param  var[] $args
+   * @return string filter
    */
   protected function _prepare($args) {
     $query= $args[0];
@@ -101,22 +99,20 @@ class LDAPQuery implements \lang\Value {
   /**
    * Prepare a query statement.
    *
-   * @param   var[] args
-   * @return  string
+   * @param  var... $args
+   * @return string
    */
-  public function prepare() {
-    $args= func_get_args();
+  public function prepare(... $args) {
     return $this->_prepare($args);
   }
   
   /**
    * Set Filter
    *
-   * @param   string filter
-   * @return  self $this
+   * @param  var... $args
+   * @return self $this
    */
-  public function setFilter() {
-    $args= func_get_args();
+  public function setFilter(... $args) {
     $this->filter= $this->_prepare($args);
     return $this;
   }
@@ -153,11 +149,10 @@ class LDAPQuery implements \lang\Value {
   /**
    * Set Base
    *
-   * @param   var[] args
-   * @return  self $this
+   * @param  var... $args
+   * @return self $this
    */
-  public function setBase() {
-    $args= func_get_args();
+  public function setBase(... $args) {
     $this->base= $this->_prepare($args);
     return $this;
   }
