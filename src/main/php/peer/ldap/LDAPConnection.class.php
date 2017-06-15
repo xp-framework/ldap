@@ -114,7 +114,7 @@ class LDAPConnection {
       if (LDAP_SERVER_DOWN === $error || -1 === $error) {
         throw new ConnectException('Cannot connect to '.$uri);
       } else {
-        throw new LDAPException('Cannot bind for "'.($user ?: $this->url->getUser(null)).'"', $error);
+        throw new LDAPException('Cannot bind for "'.($dn ?: $this->url->getUser(null)).'"', $error);
       }
     }
 
@@ -173,15 +173,15 @@ class LDAPConnection {
    * @throws  peer.ldap.LDAPException
    * @see     php://ldap_search
    */
-  public function search($base, $filter, $attributes= [], $attrsonly= 0, $sizelimit= 0, $timelimit= 0, $deref= LDAP_DEREF_NEVER) {
+  public function search($base, $filter, $attributes= [], $attrsOnly= 0, $sizeLimit= 0, $timeLimit= 0, $deref= LDAP_DEREF_NEVER) {
     if (false === ($res= ldap_search(
       $this->handle,
       $base,
       $filter,
-      $attrs,
+      $attributes,
       $attrsOnly,
       $sizeLimit,
-      $timelimit,
+      $timeLimit,
       $deref
     ))) {
       throw $this->error('Search failed');
