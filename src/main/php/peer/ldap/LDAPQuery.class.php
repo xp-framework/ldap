@@ -309,6 +309,12 @@ class LDAPQuery implements \lang\Value {
    * @return  string
    */
   public function toString() {
+    static $scopes= [
+      self::SCOPE_BASE     => 'LDAP_SCOPE_BASE',
+      self::SCOPE_ONELEVEL => 'LDAP_SCOPE_ONELEVEL',
+      self::SCOPE_SUB      => 'LDAP_SCOPE_SUB'
+    ];
+
     return sprintf(
       "%s@{\n".
       "  [filter        ] %s\n".
@@ -323,7 +329,7 @@ class LDAPQuery implements \lang\Value {
       "}",
       nameof($this),
       $this->filter,
-      $this->scope,
+      isset($scopes[$this->scope]) ? $scopes[$this->scope] : '(unknown '.$this->scope.')',
       $this->base,
       Objects::stringOf($this->attrs),
       $this->attrsOnly  ? 'true' : 'false',
