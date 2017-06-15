@@ -1,12 +1,14 @@
 <?php namespace peer\ldap;
 
+use util\Objects;
+
 /**
  * Wraps ldap search results
  *
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult implements \Iterator {
+class LDAPSearchResult implements \lang\Value, \Iterator {
   private $entries;
   private $first= null;
   private $all= null;
@@ -123,5 +125,27 @@ class LDAPSearchResult implements \Iterator {
    */
   public function toString() {
     return sprintf('%s@(%d entries)', nameof($this), $this->numEntries());
+  }
+
+  /**
+   * Retrieve a hash code of this object
+   *
+   * @return  string
+   */
+  public function hashCode() {
+    return 'R:'.Objects::hashOf($this->entries);
+  }
+
+  /**
+   * Returns whether a given comparison value is equal to this LDAP entry
+   *
+   * @param  var $value
+   * @return int
+   */
+  public function compareTo($value) {
+    return $value instanceof self
+      ? Objects::compare($this->entries, $value->entries)
+      : 1
+    ;
   }
 }
