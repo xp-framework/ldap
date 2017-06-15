@@ -6,7 +6,7 @@
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPEntries extends \lang\Object {
+class LDAPEntries {
   private $size, $conn, $result;
   private $iteration= null;
   private $entries= null;

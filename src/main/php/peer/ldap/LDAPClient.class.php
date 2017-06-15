@@ -57,7 +57,7 @@ use peer\ConnectException;
  * @test     xp://net.xp_framework.unittest.peer.LDAPTest
  * @purpose  LDAP client
  */
-class LDAPClient extends \lang\Object {
+class LDAPClient {
   const SCOPE_BASE      = 0x0000;
   const SCOPE_ONELEVEL  = 0x0001;
   const SCOPE_SUB       = 0x0002;

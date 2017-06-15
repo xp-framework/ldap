@@ -1,5 +1,7 @@
 <?php namespace peer\ldap;
 
+use util\Objects;
+
 /**
  * Class encapsulating LDAP queries.
  *
@@ -7,7 +9,7 @@
  * @see     rfc://2254
  * @test    xp://net.xp_framework.unittest.peer.LDAPQueryTest
  */
-class LDAPQuery extends \lang\Object {
+class LDAPQuery implements \lang\Value {
   const RECEIVE_TYPES  = 1;
   const RECEIVE_VALUES = 0;
 
@@ -331,5 +333,27 @@ class LDAPQuery extends \lang\Object {
     }
     
     return $str."}\n";
+  }
+
+  /**
+   * Retrieve a hash code of this object
+   *
+   * @return  string
+   */
+  public function hashCode() {
+    return Objects::hashOf((array)$this);
+  }
+
+  /**
+   * Returns whether a given comparison value is equal to this LDAP entry
+   *
+   * @param  var $value
+   * @return int
+   */
+  public function compareTo($value) {
+    return $value instanceof self
+      ? Objects::compare((array)$this, (array)$value)
+      : 1
+    ;
   }
 }

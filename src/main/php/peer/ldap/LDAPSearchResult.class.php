@@ -6,7 +6,7 @@
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult extends \lang\Object implements \Iterator {
+class LDAPSearchResult implements \Iterator {
   private $entries;
   private $first= null;
   private $all= null;

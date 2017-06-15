@@ -11,7 +11,7 @@ use util\Objects;
  * @test     xp://peer.ldap.unittest.LDAPEntryTest
  * @test     xp://peer.ldap.unittest.LDAPEntryCreateTest
  */
-class LDAPEntry extends \lang\Object {
+class LDAPEntry implements \lang\Value {
   public
     $dn=          '',
     $attributes=  array();
@@ -141,16 +141,24 @@ class LDAPEntry extends \lang\Object {
   }
 
   /**
+   * Retrieve a hash code of this object
+   *
+   * @return  string
+   */
+  public function hashCode() {
+    return 'DN:'.$this->dn;
+  }
+
+  /**
    * Returns whether a given comparison value is equal to this LDAP entry
    *
-   * @param  var $cmp
-   * @return bool
+   * @param  var $value
+   * @return int
    */
-  public function equals($cmp) {
-    return (
-      $cmp instanceof self &&
-      $this->dn === $cmp->dn &&
-      Objects::equal($this->attributes, $cmp->attributes)
-    );
+  public function compareTo($value) {
+    return $value instanceof self
+      ? Objects::compare([$this->dn, $this->attributes], [$value->dn, $value->attributes])
+      : 1
+    ;
   }
 }

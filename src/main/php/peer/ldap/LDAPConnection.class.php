@@ -23,7 +23,7 @@ use util\Secret;
  * @ext   ldap
  * @test  xp://peer.ldap.unittest.LDAPConnectionTest
  */
-class LDAPConnection extends \lang\Object {
+class LDAPConnection {
   private static $options;
 
   private $url;
