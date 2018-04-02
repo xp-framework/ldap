@@ -1,6 +1,9 @@
 <?php namespace peer\ldap;
 
 use util\Objects;
+use util\Date;
+use lang\IllegalArgumentException;
+use lang\Value;
 
 /**
  * Class encapsulating LDAP queries.
@@ -9,7 +12,7 @@ use util\Objects;
  * @see     rfc://2254
  * @test    xp://net.xp_framework.unittest.peer.LDAPQueryTest
  */
-class LDAPQuery implements \lang\Value {
+class LDAPQuery implements Value {
   const RECEIVE_TYPES  = 1;
   const RECEIVE_VALUES = 0;
 
@@ -29,54 +32,55 @@ class LDAPQuery implements \lang\Value {
     $deref=       false;
     
   /**
-   * Constructor.
+   * Constructor
    *
    * @param  string $base
+   * @param  string $filter
    * @param  var... $args
    */
-  public function __construct($base= null, ... $args) {
+  public function __construct($base= null, $filter= null, ... $args) {
     $this->base= $base;
-    $this->filter= $args ? $this->_prepare($args) : '';
+    if (null !== $filter) {
+      $this->filter= $this->_prepare($filter, $args);
+    }
   }
 
   /**
    * Format the query as requested by the format identifiers. Values are escaped
    * approriately, so they're safe to use in the query.
    *
+   * @param  string $query
    * @param  var[] $args
    * @return string filter
    */
-  protected function _prepare($args) {
-    $query= $args[0];
-    if (sizeof($args) <= 1) return $query;
+  protected function _prepare($query, $args) {
+    static $quotes= ['(' => '\\28', ')' => '\\29', '\\' => '\\5c', '*' => '\\2a', "\x00" => '\\00'];
 
-    $i= 0;
-    
+    if (empty($args)) return $query;
+
     // This fixes strtok for cases where '%' is the first character
+    $i= 0;
     $query= $tok= strtok(' '.$query, '%');
-    while (++$i && $tok= strtok('%')) {
+    while ($tok= strtok('%')) {
     
       // Support %1$s syntax
       if (is_numeric($tok{0})) {
         sscanf($tok, '%d$', $ofs);
+        $ofs--;
         $mod= strlen($ofs) + 1;
       } else {
         $ofs= $i;
         $mod= 0;
       }
-      
-      if (is_array($args[$ofs])) {
-        throw new \lang\IllegalArgumentException(
-          'Non-scalar or -object given in for LDAP query.'
-        );
-      } 
-      
+
       // Type-based conversion
-      if ($args[$ofs] instanceof \util\Date) {
+      if ($args[$ofs] instanceof Date) {
         $tok{$mod}= 's';
         $arg= $args[$ofs]->toString('YmdHi\\ZO');
-      } else if ($args[$ofs] instanceof \lang\Value) {
+      } else if ($args[$ofs] instanceof Value) {
         $arg= $args[$ofs]->toString();
+      } else if (is_array($args[$ofs]) || is_object($args[$ofs])) {
+        throw new IllegalArgumentException('Non-scalar or -object given in for LDAP query.');
       } else {
         $arg= $args[$ofs];
       }
@@ -84,36 +88,40 @@ class LDAPQuery implements \lang\Value {
       // NULL actually doesn't exist in LDAP, but is being used here to
       // clarify things (ie. show that no argument has been passed)
       switch ($tok{$mod}) {
-        case 'd': $r= is_null($arg) ? 'NULL' : sprintf('%.0f', $arg); break;
-        case 'f': $r= is_null($arg) ? 'NULL' : floatval($arg); break;
-        case 'c': $r= is_null($arg) ? 'NULL' : $arg; break;
-        case 's': $r= is_null($arg) ? 'NULL' : strtr($arg, array('(' => '\\28', ')' => '\\29', '\\' => '\\5c', '*' => '\\2a', chr(0) => '\\00')); break;
+        case 'd': $r= null === $arg ? 'NULL' : sprintf('%.0f', $arg); break;
+        case 'f': $r= null === $arg ? 'NULL' : floatval($arg); break;
+        case 'c': $r= null === $arg ? 'NULL' : $arg; break;
+        case 's': $r= null === $arg ? 'NULL' : strtr($arg, $quotes); break;
         default: $r= '%'; $mod= -1; $i--; continue;
       }
+
       $query.= $r.substr($tok, 1 + $mod);
-      
+      $i++;
     }
+
     return substr($query, 1);
   }
   
   /**
    * Prepare a query statement.
    *
+   * @param  string $format
    * @param  var... $args
    * @return string
    */
-  public function prepare(... $args) {
-    return $this->_prepare($args);
+  public function prepare($format, ... $args) {
+    return $this->_prepare($format, $args);
   }
   
   /**
    * Set Filter
    *
+   * @param  string $format
    * @param  var... $args
    * @return self $this
    */
-  public function setFilter(... $args) {
-    $this->filter= $this->_prepare($args);
+  public function setFilter($format, ... $args) {
+    $this->filter= $this->_prepare($format, $args);
     return $this;
   }
 
@@ -149,11 +157,12 @@ class LDAPQuery implements \lang\Value {
   /**
    * Set Base
    *
+   * @param  string $format
    * @param  var... $args
    * @return self $this
    */
-  public function setBase(... $args) {
-    $this->base= $this->_prepare($args);
+  public function setBase($format, ... $args) {
+    $this->base= $this->_prepare($format, $args);
     return $this;
   }
 

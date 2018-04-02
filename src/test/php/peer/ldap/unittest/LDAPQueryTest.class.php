@@ -19,6 +19,21 @@ class LDAPQueryTest extends TestCase {
   }
 
   #[@test]
+  public function can_create() {
+    new LDAPQuery();
+  }
+
+  #[@test]
+  public function can_create_with_base() {
+    $this->assertEquals('dc=example,dc=com', (new LDAPQuery('dc=example,dc=com'))->getBase());
+  }
+
+  #[@test]
+  public function can_create_with_base_filter_and_format_args() {
+    $this->assertEquals('(uid=test)', (new LDAPQuery('dc=example,dc=com', '(uid=%s)', 'test'))->getFilter());
+  }
+
+  #[@test]
   public function replaces_s_token_with_string() {
     $this->assertEquals(
       '(&(objectClass=*)(uid=kiesel))',
@@ -81,6 +96,6 @@ class LDAPQueryTest extends TestCase {
 
   #[@test, @expect(IllegalArgumentException::class)]
   public function invalid_object_argument() {
-    $this->fixture->prepare('%d', $this);
+    $this->fixture->prepare('%d', new \StdClass());
   }
 }
