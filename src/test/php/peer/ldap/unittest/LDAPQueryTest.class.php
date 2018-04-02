@@ -80,7 +80,7 @@ class LDAPQueryTest extends TestCase {
   }
 
   #[@test, @expect(IllegalArgumentException::class)]
-  public function invalid_object_argument($arg) {
+  public function invalid_object_argument() {
     $this->fixture->prepare('%d', $this);
   }
 }
