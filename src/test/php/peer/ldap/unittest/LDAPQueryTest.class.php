@@ -11,12 +11,6 @@ use util\Date;
  * @see   xp://peer.ldap.LDAPQuery
  */
 class LDAPQueryTest extends TestCase {
-  private $fixture;
-
-  /** @return void */
-  public function setUp() {
-    $this->fixture= new LDAPQuery();
-  }
 
   #[@test]
   public function can_create() {
@@ -37,23 +31,23 @@ class LDAPQueryTest extends TestCase {
   public function replaces_s_token_with_string() {
     $this->assertEquals(
       '(&(objectClass=*)(uid=kiesel))',
-      $this->fixture->prepare('(&(objectClass=*)(uid=%s))', 'kiesel')
+      (new LDAPQuery())->prepare('(&(objectClass=*)(uid=%s))', 'kiesel')
     );
   }
 
   #[@test]
   public function percent_sign_first() {
-    $this->assertEquals('foo bar', $this->fixture->prepare('%s', 'foo bar'));
+    $this->assertEquals('foo bar', (new LDAPQuery())->prepare('%s', 'foo bar'));
   }
 
   #[@test]
   public function percent_sign_escaping() {
-    $this->assertEquals('foo%bar', $this->fixture->prepare('foo%%bar', 'arg'));
+    $this->assertEquals('foo%bar', (new LDAPQuery())->prepare('foo%%bar', 'arg'));
   }
 
   #[@test]
   public function numbered_tokens_are_supported() {
-    $this->assertEquals('foo bar', $this->fixture->prepare('%2$s %1$s', 'bar', 'foo'));
+    $this->assertEquals('foo bar', (new LDAPQuery())->prepare('%2$s %1$s', 'bar', 'foo'));
   }
 
   #[@test, @values([
@@ -64,25 +58,25 @@ class LDAPQueryTest extends TestCase {
   #  ["foo\000bar", 'foo\\00bar']
   #])]
   public function special_characters_are_escaped($input, $expected) {
-    $this->assertEquals($expected, $this->fixture->prepare('%s', $input));
+    $this->assertEquals($expected, (new LDAPQuery())->prepare('%s', $input));
   }
 
   #[@test]
   public function copy_through_token() {
-    $this->assertEquals('foo(*'.chr(0).'\\)bar', $this->fixture->prepare('%c', 'foo(*'.chr(0).'\\)bar'));
+    $this->assertEquals('foo(*'.chr(0).'\\)bar', (new LDAPQuery())->prepare('%c', 'foo(*'.chr(0).'\\)bar'));
   }
   
   #[@test, @values(['%d', '%s'])]
   public function dates_as_argument($token) {
     $this->assertEquals(
       '198005280630Z+0200',
-      $this->fixture->prepare($token, new Date('1980-05-28 06:30:00 Europe/Berlin'))
+      (new LDAPQuery())->prepare($token, new Date('1980-05-28 06:30:00 Europe/Berlin'))
     );
   }
 
   #[@test, @values(['%d', '%s'])]
   public function null_as_argument($token) {
-    $this->assertEquals('NULL', $this->fixture->prepare($token, null));
+    $this->assertEquals('NULL', (new LDAPQuery())->prepare($token, null));
   }
 
   #[@test, @expect(IllegalArgumentException::class), @values([
@@ -91,11 +85,11 @@ class LDAPQueryTest extends TestCase {
   #  [['color' => 'green']],
   #])]
   public function invalid_array_argument($arg) {
-    $this->fixture->prepare('%d', $arg);
+    (new LDAPQuery())->prepare('%d', $arg);
   }
 
   #[@test, @expect(IllegalArgumentException::class)]
   public function invalid_object_argument() {
-    $this->fixture->prepare('%d', new \StdClass());
+    (new LDAPQuery())->prepare('%d', new \StdClass());
   }
 }
