@@ -1,6 +1,8 @@
 <?php namespace peer\ldap\unittest;
  
+use lang\IllegalArgumentException;
 use peer\ldap\LDAPQuery;
+use unittest\TestCase;
 use util\Date;
 
 /**
@@ -8,14 +10,10 @@ use util\Date;
  *
  * @see   xp://peer.ldap.LDAPQuery
  */
-class LDAPQueryTest extends \unittest\TestCase {
+class LDAPQueryTest extends TestCase {
   private $fixture;
 
-  /**
-   * Creates fixture
-   *
-   * @return void
-   */
+  /** @return void */
   public function setUp() {
     $this->fixture= new LDAPQuery();
   }
@@ -69,17 +67,20 @@ class LDAPQueryTest extends \unittest\TestCase {
 
   #[@test, @values(['%d', '%s'])]
   public function null_as_argument($token) {
-    $this->assertEquals(
-      'NULL',
-      $this->fixture->prepare($token, null)
-    );
+    $this->assertEquals('NULL', $this->fixture->prepare($token, null));
   }
 
-  #[@test, @expect('lang.IllegalArgumentException'), @values([
-  #  [[]], [[1, 2, 3]], [['color' => 'green']],
-  #  [new \lang\Object()]
+  #[@test, @expect(IllegalArgumentException::class), @values([
+  #  [[]],
+  #  [[1, 2, 3]],
+  #  [['color' => 'green']],
   #])]
-  public function invalid_argument($arg) {
-    $this->fixture->prepare('%d', [1, 2, 3]);
+  public function invalid_array_argument($arg) {
+    $this->fixture->prepare('%d', $arg);
+  }
+
+  #[@test, @expect(IllegalArgumentException::class)]
+  public function invalid_object_argument($arg) {
+    $this->fixture->prepare('%d', $this);
   }
 }
