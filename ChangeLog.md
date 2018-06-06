@@ -3,6 +3,13 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 8.1.0 / 2018-06-06
+
+* Added `peer.ldap.LDAPNoSuchObject` exception for `LDAP_NO_SUCH_OBJECT`
+  errors. This is useful when performing searches on subtrees that exist
+  in 99.9% of all cases, so we don't check them beforehand.
+  (@thekid)
+
 ## 8.0.1 / 2018-04-02
 
 * Fixed compatiblity with PHP 7.2 - @thekid
