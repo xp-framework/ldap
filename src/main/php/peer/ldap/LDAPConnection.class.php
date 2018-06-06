@@ -150,12 +150,17 @@ class LDAPConnection {
    */
   private function error($message) {
     $error= ldap_errno($this->handle);
-    if (LDAP_SERVER_DOWN === $error || -1 === $error) {
-      ldap_unbind($this->handle);
-      $this->handle= null;
-      return new LDAPDisconnected($message, $error);
-    } else {
-      return new LDAPException($message, $error);
+    switch ($error) {
+      case -1: case LDAP_SERVER_DOWN:
+        ldap_unbind($this->handle);
+        $this->handle= null;
+        return new LDAPDisconnected($message, $error);
+
+      case LDAP_NO_SUCH_OBJECT:
+        return new LDAPNoSuchObject($message, $error);
+    
+      default:  
+        return new LDAPException($message, $error);
     }
   }
 
