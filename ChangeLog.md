@@ -3,6 +3,12 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 8.1.1 / 2018-07-30
+
+* Fixed issue #13: Warning *"continue" targeting switch is equivalent to 
+  "break"* which started occurring in PHP 7.3
+  (@thekid)
+
 ## 8.1.0 / 2018-06-06
 
 * Added `peer.ldap.LDAPNoSuchObject` exception for `LDAP_NO_SUCH_OBJECT`

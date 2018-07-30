@@ -1,9 +1,9 @@
 <?php namespace peer\ldap;
 
-use util\Objects;
-use util\Date;
 use lang\IllegalArgumentException;
 use lang\Value;
+use util\Date;
+use util\Objects;
 
 /**
  * Class encapsulating LDAP queries.
@@ -92,7 +92,7 @@ class LDAPQuery implements Value {
         case 'f': $r= null === $arg ? 'NULL' : floatval($arg); break;
         case 'c': $r= null === $arg ? 'NULL' : $arg; break;
         case 's': $r= null === $arg ? 'NULL' : strtr($arg, $quotes); break;
-        default: $r= '%'; $mod= -1; $i--; continue;
+        default: $r= '%'; $mod= -1; $i--;
       }
 
       $query.= $r.substr($tok, 1 + $mod);
