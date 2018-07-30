@@ -2,7 +2,7 @@
 
 use peer\ldap\LDAPException;
 
-class LdapProtocol extends \lang\Object {
+class LdapProtocol {
   const REQ_BIND = 0x60;
   const REQ_UNBIND = 0x42;
   const REQ_SEARCH = 0x63;

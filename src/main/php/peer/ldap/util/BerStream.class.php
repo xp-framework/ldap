@@ -4,7 +4,7 @@ use io\streams\BufferedInputStream;
 use io\streams\InputStream;
 use io\streams\OutputStream;
 
-class BerStream extends \lang\Object {
+class BerStream {
   const EOC = 0;
   const BOOLEAN = 1;
   const INTEGER = 2;
