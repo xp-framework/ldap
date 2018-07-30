@@ -70,8 +70,7 @@ define('LDAP_REFERRAL_LIMIT_EXCEEDED',         0x0061);
  * @see      http://developer.netscape.com/docs/manuals/dirsdk/jsdk40/Reference/netscape/ldap/LDAPException.html
  */
 class LDAPException extends \lang\XPException {
-  public
-    $errorcode = 0;
+  public $errorcode;
     
   /**
    * Constructor
@@ -101,7 +100,7 @@ class LDAPException extends \lang\XPException {
   public function compoundMessage() {
     return sprintf(
       'Exception %s (LDAP errorcode #%d [%s]: %s)',
-      $this->getClassName(),
+      nameof($this),
       $this->errorcode,
       ldap_err2str($this->errorcode),
       $this->message

@@ -1,80 +1,66 @@
 <?php namespace peer\ldap;
 
-
+use util\Objects;
 
 /**
  * Wraps ldap search results
  *
  * @see      php://ldap_get_entries
- * @test     xp://net.xp_framework.unittest.peer.LDAPResultTest
+ * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult extends \lang\Object {
-  public
-    $size     = null;
-
-  protected
-    $_hdl     = null,
-    $_res     = null,
-    $entry    = null,
-    $entries  = array();
+class LDAPSearchResult implements \lang\Value, \Iterator {
+  private $entries;
+  private $first= null;
+  private $all= null;
+  private $iteration= null;
 
   /**
    * Constructor
    *
-   * @param   resource hdl ldap connection
-   * @param   resource res ldap result resource
+   * @param  peer.ldap.LDAPEntries $entries
    */
-  public function __construct($hdl, $res) {
-    $this->_hdl= $hdl;
-    $this->_res= $res;
-    $this->size= ldap_count_entries($this->_hdl, $this->_res);
+  public function __construct($entries) {
+    $this->entries= $entries;
   }
-  
+
   /**
    * Returns number of found elements
    *
    * @return  int
    */
   public function numEntries() {
-    return $this->size;
+    return $this->entries->size();
   }
-  
+
   /**
    * Gets first entry
    *
-   * @return  peer.ldap.LDAPEntry or FALSE if none exists by this offset
+   * @return  peer.ldap.LDAPEntry or NULL if there is no first entry
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getFirstEntry() {
-    $this->entry= array(ldap_first_entry($this->_hdl, $this->_res));
-    if (false === $this->entry[0]) {
-      if (!($e= ldap_errno($this->_hdl))) return false;
-      throw new \LDAPException('Could not fetch first result entry.', $e);
-    }
-    
-    $this->entry[1]= 1;
-    return LDAPEntry::fromResource($this->_hdl, $this->entry[0]);
+    $this->first= $this->entries->first();
+    return $this->first;
   }
-  
+
   /**
    * Get a search entry by resource
    *
    * @param   int offset
-   * @return  peer.ldap.LDAPEntry or FALSE if none exists by this offset
+   * @return  peer.ldap.LDAPEntry or NULL if none exists by this offset
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getEntry($offset) {
-    if (!$this->entries) {
-      $this->entries= ldap_get_entries($this->_hdl, $this->_res);
-      if (!is_array($this->entries)) {
-        throw new \LDAPException('Could not read result entries.', ldap_errno($this->_hdl));
-      }
+    if (null === $this->all) {
+      $this->all= [];
+      if ($entry= $this->entries->first()) do {
+        $this->all[]= $entry;
+      } while ($entry= $this->entries->next());
     }
     
-    if (!isset($this->entries[$offset])) return false;
-    return LDAPEntry::fromData($this->entries[$offset]);
+    return isset($this->all[$offset]) ? $this->all[$offset] : null;
   }
-  
+
   /**
    * Gets next entry - ideal for loops such as:
    * <code>
@@ -83,7 +69,7 @@ class LDAPSearchResult extends \lang\Object {
    *   }
    * </code>
    *
-   * @return  peer.ldap.LDAPEntry or FALSE if none exists by this offset
+   * @return  peer.ldap.LDAPEntry or NULL for EOF
    * @throws  peer.ldap.LDAPException in case of a read error
    */
   public function getNextEntry() {
@@ -91,30 +77,11 @@ class LDAPSearchResult extends \lang\Object {
     // Check if we were called without getFirstEntry() being called first
     // Tolerate this situation by simply returning whatever getFirstEntry()
     // returns.
-    if (null === $this->entry) {
+    if (null === $this->first) {
       return $this->getFirstEntry();
     }
-    
-    // If we have reached the number of results reported by ldap_count_entries()
-    // - see constructor, return FALSE without trying to read further. Trying
-    // to read "past the end" results in LDAP error #84 (decoding error) in some 
-    // client/server constellations, which is then incorrectly reported as an error.
-    if ($this->entry[1] >= $this->size) {
-      return false;
-    }
-    
-    // Fetch the next entry. Return FALSE if it was the last one (where really,
-    // we shouldn't be getting here)
-    $this->entry[0]= ldap_next_entry($this->_hdl, $this->entry[0]);
-    if (false === $this->entry[0]) {
-      if (!($e= ldap_errno($this->_hdl))) return false;
-      throw new \LDAPException('Could not fetch next result entry.', $e);
-    }
-    
-    // Keep track how many etnries we have fetched so we stop once we
-    // have reached this number - see above for explanation.
-    $this->entry[1]++;
-    return LDAPEntry::fromResource($this->_hdl, $this->entry[0]);
+
+    return $this->entries->next();    
   }
 
   /**
@@ -123,6 +90,62 @@ class LDAPSearchResult extends \lang\Object {
    * @return  bool success
    */
   public function close() {
-    return ldap_free_result($this->_res);
+    return $this->entries->close();
+  }
+
+  /** @return void */
+  public function rewind() {
+    $this->iteration= [$this->entries->first(), 0];
+  }
+
+  /** @return peer.ldap.LDAPEntry */
+  public function current() {
+    return $this->iteration[0];
+  }
+
+  /** @return int */
+  public function key() {
+    return $this->iteration[1];
+  }
+
+  /** @return void */
+  public function next() {
+    $this->iteration= [$this->entries->next(), ++$this->iteration[1]];
+  }
+
+  /** @return bool */
+  public function valid() {
+    return null !== $this->iteration[0];
+  }
+
+  /**
+   * Retrieve a string representation of this object
+   *
+   * @return  string
+   */
+  public function toString() {
+    return sprintf('%s@(%d entries)', nameof($this), $this->numEntries());
+  }
+
+  /**
+   * Retrieve a hash code of this object
+   *
+   * @return  string
+   */
+  public function hashCode() {
+    return 'R:'.Objects::hashOf($this->entries);
+  }
+
+  /**
+   * Returns whether a given comparison value is equal to this LDAP entry
+   *
+   * @param  var $value
+   * @return int
+   */
+  public function compareTo($value) {
+    return $value instanceof self
+      ? Objects::compare($this->entries, $value->entries)
+      : 1
+    ;
   }
 }

@@ -36,7 +36,7 @@
  *
  * @purpose  LDIF Writer
  */
-class LDIFWriter extends \lang\Object {
+class LDIFWriter {
   public
     $stream       = null;
     
