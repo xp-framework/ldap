@@ -1,9 +1,9 @@
 <?php namespace peer\ldap;
 
-use util\Objects;
-use util\Date;
 use lang\IllegalArgumentException;
 use lang\Value;
+use util\Date;
+use util\Objects;
 
 /**
  * Class encapsulating LDAP queries.
@@ -41,26 +41,25 @@ class LDAPQuery implements Value {
   public function __construct($base= null, $filter= null, ... $args) {
     $this->base= $base;
     if (null !== $filter) {
-      $this->filter= $this->_prepare($filter, $args);
+      $this->filter= $this->prepare($filter, ...$args);
     }
   }
 
   /**
-   * Format the query as requested by the format identifiers. Values are escaped
-   * approriately, so they're safe to use in the query.
+   * Prepare a query statement.
    *
-   * @param  string $query
-   * @param  var[] $args
-   * @return string filter
+   * @param  string $format
+   * @param  var... $args
+   * @return string
    */
-  protected function _prepare($query, $args) {
+  public function prepare($format, ... $args) {
     static $quotes= ['(' => '\\28', ')' => '\\29', '\\' => '\\5c', '*' => '\\2a', "\x00" => '\\00'];
 
-    if (empty($args)) return $query;
+    if (empty($args)) return $format;
 
     // This fixes strtok for cases where '%' is the first character
     $i= 0;
-    $query= $tok= strtok(' '.$query, '%');
+    $format= $tok= strtok(' '.$format, '%');
     while ($tok= strtok('%')) {
     
       // Support %1$s syntax
@@ -92,25 +91,14 @@ class LDAPQuery implements Value {
         case 'f': $r= null === $arg ? 'NULL' : floatval($arg); break;
         case 'c': $r= null === $arg ? 'NULL' : $arg; break;
         case 's': $r= null === $arg ? 'NULL' : strtr($arg, $quotes); break;
-        default: $r= '%'; $mod= -1; $i--; continue;
+        default: $r= '%'; $mod= -1; $i--;
       }
 
-      $query.= $r.substr($tok, 1 + $mod);
+      $format.= $r.substr($tok, 1 + $mod);
       $i++;
     }
 
-    return substr($query, 1);
-  }
-  
-  /**
-   * Prepare a query statement.
-   *
-   * @param  string $format
-   * @param  var... $args
-   * @return string
-   */
-  public function prepare($format, ... $args) {
-    return $this->_prepare($format, $args);
+    return substr($format, 1);
   }
   
   /**
@@ -121,7 +109,7 @@ class LDAPQuery implements Value {
    * @return self $this
    */
   public function setFilter($format, ... $args) {
-    $this->filter= $this->_prepare($format, $args);
+    $this->filter= $this->prepare($format, ...$args);
     return $this;
   }
 
@@ -162,7 +150,7 @@ class LDAPQuery implements Value {
    * @return self $this
    */
   public function setBase($format, ... $args) {
-    $this->base= $this->_prepare($format, $args);
+    $this->base= $this->prepare($format, ...$args);
     return $this;
   }
 
