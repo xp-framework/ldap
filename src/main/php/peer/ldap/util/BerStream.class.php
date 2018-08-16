@@ -53,31 +53,29 @@ class BerStream {
   public function __construct(InputStream $in, OutputStream $out) {
 
     // Debug
-    /*
-    $in= newinstance('io.streams.InputStream', [$in], [
-      'backing'     => null,
-      '__construct' => function($backing) { $this->backing= $backing; },
-      'read'        => function($length= 8192) {
-        $chunk= $this->backing->read($length);
-        if (null !== $chunk) {
-          \util\cmd\Console::writeLine(BerStream::dump($chunk, '<<<'));
-        }
-        return $chunk;
-      },
-      'available'   => function() { return $this->backing->available(); },
-      'close'       => function() { $this->backing->close(); }
-    ]);
-    $out= newinstance('io.streams.OutputStream', [$out], [
-      'backing'     => null,
-      '__construct' => function($backing) { $this->backing= $backing; },
-      'write'       => function($chunk) {
-        \util\cmd\Console::writeLine(BerStream::dump($chunk, '>>>'));
-        return $this->backing->write($chunk);
-      },
-      'flush'       => function() { return $this->backing->flush(); },
-      'close'       => function() { $this->backing->close(); }
-    ]);
-    */
+    // $in= newinstance('io.streams.InputStream', [$in], [
+    //   'backing'     => null,
+    //   '__construct' => function($backing) { $this->backing= $backing; },
+    //   'read'        => function($length= 8192) {
+    //     $chunk= $this->backing->read($length);
+    //     if (null !== $chunk) {
+    //       \util\cmd\Console::writeLine(BerStream::dump($chunk, '<<<'));
+    //     }
+    //     return $chunk;
+    //   },
+    //   'available'   => function() { return $this->backing->available(); },
+    //   'close'       => function() { $this->backing->close(); }
+    // ]);
+    // $out= newinstance('io.streams.OutputStream', [$out], [
+    //   'backing'     => null,
+    //   '__construct' => function($backing) { $this->backing= $backing; },
+    //   'write'       => function($chunk) {
+    //     \util\cmd\Console::writeLine(BerStream::dump($chunk, '>>>'));
+    //     return $this->backing->write($chunk);
+    //   },
+    //   'flush'       => function() { return $this->backing->flush(); },
+    //   'close'       => function() { $this->backing->close(); }
+    // ]);
 
     $this->in= $in instanceof BufferedInputStream ? $in : new BufferedInputStream($in, 8192);
     $this->out= $out;
@@ -234,6 +232,18 @@ class BerStream {
    */
   public function writeEnumeration($e, $tag= self::ENUMERATION) {
     $this->writeInt($e, $tag);
+  }
+
+  /**
+   * Write enumeration to current sequence
+   *
+   * @param  string $buffer
+   * @param  int $tag
+   */
+  public function writeBuffer($buffer, $tag) {
+    $this->writeByte($tag);
+    $this->writeLength(strlen($buffer));
+    $this->write($buffer);
   }
 
   /**

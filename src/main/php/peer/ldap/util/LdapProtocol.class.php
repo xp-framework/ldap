@@ -1,6 +1,9 @@
 <?php namespace peer\ldap\util;
 
+use peer\SSLSocket;
+use peer\Socket;
 use peer\ldap\LDAPException;
+use peer\ldap\LDAPSearchResult;
 
 class LdapProtocol {
   const REQ_BIND = 0x60;
@@ -42,17 +45,22 @@ class LdapProtocol {
 
   protected $messageId= 0;
 
-  /**
-   * Creates a new protocol instance communicating on the given socket
-   *
-   * @param  peer.Socket $sock
-   */
-  public function __construct(\peer\Socket $sock) {
-    $this->stream= new BerStream(
-      $sock->getInputStream(),
-      $sock->getOutputStream()
-    );
+  public function __construct($scheme, $host, $port, $params) {
+    if ('ldaps' === $scheme) {
+      $this->sock= new SSLSocket($host, $port);  
+    } else {
+      $this->sock= new Socket($host, $port);
+    }
   }
+
+  /** @return string */
+  public function connection() { return $this->sock->toString(); }
+
+  /** @return int */
+  public function id() { return (int)$this->sock->getHandle(); }
+
+  /** @return bool */
+  public function connected() { return $this->sock->isConnected(); }
 
   /**
    * Calculates and returns next message id, starting with 1.
@@ -118,17 +126,20 @@ class LdapProtocol {
    * Bind
    *
    * @param  string $user
-   * @param  string $password
+   * @param  util.Secret $password
    * @return void
    * @throws peer.ldap.LDAPException
    */
-  public function bind($user, $password) {
+  public function connect($user, $password) {
+    $this->sock->connect();
+    $this->stream= new BerStream($this->sock->in(), $this->sock->out());
+
     $this->send([
       'req'   => self::REQ_BIND,
       'write' => function($stream) use($user, $password) {
         $stream->writeInt($version= 3);
         $stream->writeString($user);
-        $stream->writeString($password, BerStream::CONTEXT);
+        $stream->writeString($password->reveal(), BerStream::CONTEXT);
       },
       'res'   => self::RES_BIND,
       'read'  => [self::RES_BIND => function($stream) {
@@ -149,10 +160,10 @@ class LdapProtocol {
    * @param  string $base
    * @return var
    */
-  public function search($base) {
-    return $this->send([
+  public function search($scope, $base, $filter, $attributes= [], $attrsOnly= 0, $sizeLimit= 0, $timeLimit= 0, $sort= [], $deref= LDAP_DEREF_NEVER) {
+    $r= $this->send([
       'req'   => self::REQ_SEARCH,
-      'write' => function($stream) use($base) {
+      'write' => function($stream) use($base, $filter, $attributes) {
         $stream->writeString($base);
         $stream->writeEnumeration(self::SCOPE_ONE_LEVEL);
         $stream->writeEnumeration(self::NEVER_DEREF_ALIASES);
@@ -160,11 +171,21 @@ class LdapProtocol {
         $stream->writeInt(0);
         $stream->writeBoolean(false);
 
-        $stream->startSequence(0x87);
-        $stream->write('objectClass');
+        // substring filter {{{
+        $stream->startSequence(0xa4);
+
+        $stream->writeString('cn');
+        $stream->startSequence();
+        $stream->writeString('Friebe', 0x80);
         $stream->endSequence();
 
+        $stream->endSequence();
+        // }}}
+
         $stream->startSequence();
+        foreach ($attributes as $attribute) {
+          $stream->writeString($attribute);
+        }
         $stream->endSequence();
       },
       'res'   => [self::RES_SEARCH_ENTRY, self::RES_SEARCH],
@@ -187,7 +208,7 @@ class LdapProtocol {
             $stream->finishSequence();
           } while ($stream->remaining());
           $stream->finishSequence();
-          return ['name' => $name, 'attr' => $attributes];
+          return ['dn' => $name, 'attr' => $attributes];
         },
         self::RES_SEARCH => function($stream) {
           $status= $stream->readEnumeration();
@@ -198,6 +219,7 @@ class LdapProtocol {
         }
       ]
     ]);
+    return new LDAPSearchResult(new Entries($r));
   }
 
   /**
