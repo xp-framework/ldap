@@ -1,9 +1,12 @@
 <?php namespace peer\ldap;
 
+use lang\IllegalArgumentException;
+use lang\Value;
+use lang\XPClass;
 use peer\ConnectException;
 use peer\URL;
-use lang\XPClass;
-use lang\IllegalArgumentException;
+use peer\ldap\util\LdapLibrary;
+use peer\ldap\util\LdapProtocol;
 use util\Secret;
 
 /**
@@ -23,31 +26,12 @@ use util\Secret;
  * @ext   ldap
  * @test  xp://peer.ldap.unittest.LDAPConnectionTest
  */
-class LDAPConnection {
-  private static $options;
-
+class LDAPConnection implements Value {
   private $url;
   private $handle= null;
 
   static function __static() {
     XPClass::forName('peer.ldap.LDAPException');  // Error codes
-    self::$options= [
-      'deref' => function($handle, $value) {
-        return ldap_set_option($handle, LDAP_OPT_DEREF, constant('LDAP_DEREF_'.strtoupper($value)));
-      },
-      'sizelimit' => function($handle, $value) {
-        return ldap_set_option($handle, LDAP_OPT_SIZELIMIT, (int)$value);
-      },
-      'timelimit' => function($handle, $value) {
-        return ldap_set_option($handle, LDAP_OPT_TIMELIMIT, (int)$value);
-      },
-      'network_timeout' => function($handle, $value) {
-        return ldap_set_option($handle, LDAP_OPT_NETWORK_TIMEOUT, (int)$value);
-      },
-      'protocol_version' => function($handle, $value) {
-        return ldap_set_option($handle, LDAP_OPT_PROTOCOL_VERSION, (int)$value);
-      },
-    ];
   }
 
   /**
@@ -58,12 +42,18 @@ class LDAPConnection {
    * @throws lang.IllegalArgumentException when DSN is malformed
    */
   public function __construct($dsn) {
+    static $ports= ['ldap' => 389, 'ldaps' => 636];
+
+    // TODO: Driver!
+    $impl= getenv('PROTO') ? LdapProtocol::class : LdapLibrary::class;
+
     $this->url= $dsn instanceof URL ? $dsn : new URL($dsn);
-    foreach ($this->url->getParams() as $option => $value) {
-      if (!isset(self::$options[$option])) {
-        throw new IllegalArgumentException('Unknown option "'.$option.'"');
-      }
-    }
+    $this->proto= new $impl(
+      $this->url->getScheme(),
+      $this->url->getHost(),
+      $this->url->getPort($ports[$this->url->getScheme()]),
+      $this->url->getParams()
+    );
   }
 
   /** @return peer.URL */
@@ -79,45 +69,12 @@ class LDAPConnection {
    * @throws peer.ConnectException
    */
   public function connect($dn= null, Secret $password= null) {
-    static $ports= ['ldap' => 389, 'ldaps' => 636];
+    if ($this->proto->connected()) return true;
 
-    if ($this->isConnected()) return true;
-
-    $uri= sprintf(
-      '%s://%s:%d',
-      $this->url->getScheme(),
-      $this->url->getHost(),
-      $this->url->getPort($ports[$this->url->getScheme()])
+    $this->proto->connect(
+      $dn ?: $this->url->getUser(null),
+      $password ?: new Secret($this->url->getPassword(null))
     );
-    if (false === ($this->handle= ldap_connect($uri))) {
-      throw new ConnectException('Cannot connect to '.$uri);
-    }
-
-    foreach (array_merge(['protocol_version' => 3], $this->url->getParams()) as $option => $value) {
-      $set= self::$options[$option];
-      if (!$set($this->handle, $value)) {
-        ldap_unbind($this->handle);
-        $this->handle= null;
-        throw new LDAPException('Cannot set option "'.$option.'"', ldap_errno($this->handle));
-      }
-    }
-
-    if (null === $dn) {
-      $result= ldap_bind($this->handle, $this->url->getUser(null), $this->url->getPassword(null));
-    } else {
-      $result= ldap_bind($this->handle, $dn, $password->reveal());
-    }
-    if (false === $result) {
-      $error= ldap_errno($this->handle);
-      ldap_unbind($this->handle);
-      $this->handle= null;
-      if (LDAP_SERVER_DOWN === $error || -1 === $error) {
-        throw new ConnectException('Cannot connect to '.$uri);
-      } else {
-        throw new LDAPException('Cannot bind for "'.($dn ?: $this->url->getUser(null)).'"', $error);
-      }
-    }
-
     return $this;
   }
 
@@ -127,7 +84,7 @@ class LDAPConnection {
    * @return bool
    */
   public function isConnected() {
-    return is_resource($this->handle);
+    return $this->proto->connected();
   }
   
   /**
@@ -136,10 +93,7 @@ class LDAPConnection {
    * @see     php://ldap_close
    */
   public function close() {
-    if ($this->handle) {
-      ldap_unbind($this->handle);
-      $this->handle= null;
-    }
+    $this->proto->close();
   }
 
   /**
@@ -149,11 +103,11 @@ class LDAPConnection {
    * @return peer.ldap.LDAPException
    */
   private function error($message) {
-    $error= ldap_errno($this->handle);
+    $error= ldap_errno($this->proto->handle);
     switch ($error) {
       case -1: case LDAP_SERVER_DOWN:
-        ldap_unbind($this->handle);
-        $this->handle= null;
+        ldap_unbind($this->proto->handle);
+        $this->proto->handle= null;
         return new LDAPDisconnected($message, $error);
 
       case LDAP_NO_SUCH_OBJECT:
@@ -179,20 +133,17 @@ class LDAPConnection {
    * @see     php://ldap_search
    */
   public function search($base, $filter, $attributes= [], $attrsOnly= 0, $sizeLimit= 0, $timeLimit= 0, $deref= LDAP_DEREF_NEVER) {
-    if (false === ($res= ldap_search(
-      $this->handle,
+    return $this->proto->search(
+      LDAPQuery::SCOPE_SUB,
       $base,
       $filter,
       $attributes,
       $attrsOnly,
       $sizeLimit,
       $timeLimit,
+      null,
       $deref
-    ))) {
-      throw $this->error('Search failed');
-    }
-    
-    return new LDAPSearchResult(new LDAPEntries($this->handle, $res));
+    );
   }
   
   /**
@@ -202,37 +153,17 @@ class LDAPConnection {
    * @return  peer.ldap.LDAPSearchResult search result object
    */
   public function searchBy(LDAPQuery $filter) {
-    static $methods= [
-      LDAPQuery::SCOPE_BASE     => 'ldap_read',
-      LDAPQuery::SCOPE_ONELEVEL => 'ldap_list',
-      LDAPQuery::SCOPE_SUB      => 'ldap_search'
-    ];
-    
-    if (!isset($methods[$filter->getScope()])) {
-      throw new IllegalArgumentException('Scope '.$filter->getScope().' not supported');
-    }
-
-    $f= $methods[$filter->getScope()];
-    if (false === ($res= $f(
-      $this->handle,
+    return $this->proto->search(
+      $filter->getScope(),
       $filter->getBase(),
       $filter->getFilter(),
       $filter->getAttrs(),
       $filter->getAttrsOnly(),
       $filter->getSizeLimit(),
       $filter->getTimelimit(),
+      $filter->getSort(),
       $filter->getDeref()
-    ))) {
-      throw $this->error('Search failed');
-    }
-
-    if ($sort= $filter->getSort()) {
-      $entries= new SortedLDAPEntries($this->handle, $res, $sort);
-    } else {
-      $entries= new LDAPEntries($this->handle, $res);
-    }
-
-    return new LDAPSearchResult($entries);
+    );
   }
   
   /**
@@ -244,13 +175,13 @@ class LDAPConnection {
    * @throws  peer.ldap.LDAPException
    */
   public function read(LDAPEntry $entry) {
-    $res= ldap_read($this->handle, $entry->getDN(), 'objectClass=*', [], false, 0);
-    if (LDAP_SUCCESS != ldap_errno($this->handle)) {
+    $res= ldap_read($this->proto->handle, $entry->getDN(), 'objectClass=*', [], false, 0);
+    if (LDAP_SUCCESS != ldap_errno($this->proto->handle)) {
       throw $this->error('Read "'.$entry->getDN().'" failed');
     }
 
-    $entry= ldap_first_entry($this->handle, $res);
-    return LDAPEntry::create(ldap_get_dn($this->handle, $entry), ldap_get_attributes($this->handle, $entry));
+    $entry= ldap_first_entry($this->proto->handle, $res);
+    return LDAPEntry::create(ldap_get_dn($this->proto->handle, $entry), ldap_get_attributes($this->proto->handle, $entry));
   }
   
   /**
@@ -260,15 +191,15 @@ class LDAPConnection {
    * @return  bool TRUE if the entry exists
    */
   public function exists(LDAPEntry $entry) {
-    $res= ldap_read($this->handle, $entry->getDN(), 'objectClass=*', [], false, 0);
+    $res= ldap_read($this->proto->handle, $entry->getDN(), 'objectClass=*', [], false, 0);
     
     // Check for certain error code (#32)
-    if (LDAP_NO_SUCH_OBJECT === ldap_errno($this->handle)) {
+    if (LDAP_NO_SUCH_OBJECT === ldap_errno($this->proto->handle)) {
       return false;
     }
     
     // Check for other errors
-    if (LDAP_SUCCESS != ldap_errno($this->handle)) {
+    if (LDAP_SUCCESS != ldap_errno($this->proto->handle)) {
       throw $this->error('Read "'.$entry->getDN().'" failed');
     }
     
@@ -289,7 +220,7 @@ class LDAPConnection {
     
     // This actually returns NULL on failure, not FALSE, as documented
     if (null == ($res= ldap_add(
-      $this->handle, 
+      $this->proto->handle, 
       $entry->getDN(), 
       $entry->getAttributes()
     ))) {
@@ -312,7 +243,7 @@ class LDAPConnection {
    */
   public function modify(LDAPEntry $entry) {
     if (false == ($res= ldap_modify(
-      $this->handle,
+      $this->proto->handle,
       $entry->getDN(),
       $entry->getAttributes()
     ))) {
@@ -332,7 +263,7 @@ class LDAPConnection {
    */
   public function delete(LDAPEntry $entry) {
     if (false == ($res= ldap_delete(
-      $this->handle,
+      $this->proto->handle,
       $entry->getDN()
     ))) {
       throw $this->error('Delete for "'.$entry->getDN().'" failed');
@@ -351,7 +282,7 @@ class LDAPConnection {
    */
   public function addAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_add(
-      $this->handle,
+      $this->proto->handle,
       $entry->getDN(),
       [$name => $value]
     ))) {
@@ -370,7 +301,7 @@ class LDAPConnection {
    */
   public function deleteAttribute(LDAPEntry $entry, $name) {
     if (false == ($res= ldap_mod_del(
-      $this->handle,
+      $this->proto->handle,
       $entry->getDN(),
       $name
     ))) {
@@ -390,7 +321,7 @@ class LDAPConnection {
    */
   public function replaceAttribute(LDAPEntry $entry, $name, $value) {
     if (false == ($res= ldap_mod_replace(
-      $this->handle,
+      $this->proto->handle,
       $entry->getDN(),
       [$name => $value]
     ))) {
@@ -398,5 +329,21 @@ class LDAPConnection {
     }
     
     return $res;
+  }
+
+  /** @return string */
+  public function toString() { return nameof($this).'('.$this->proto->connection().')'; }
+
+  /** @return string */
+  public function hashCode() { return 'C'.$this->proto->id(); }
+
+  /**
+   * Compare
+   *
+   * @param  var $value
+   * @return int
+   */
+  public function compareTo($value) {
+    return $value === $this ? 0 : 1;
   }
 }
