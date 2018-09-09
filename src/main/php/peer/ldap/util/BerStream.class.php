@@ -247,7 +247,118 @@ class BerStream {
   }
 
   /**
+   * Writes a filter
+   *
+   * @param  peer.ldap.filter.Filter
+   * @return void
+   */
+  public function writeFilter($filter) {
+    $this->{'writeFilter'.$filter->kind}($filter);
+  }
+
+  /** FILTER_AND = 0xa0 */
+  private function writeFilterAnd($and) {
+    $this->startSequence(0xa0);
+    foreach ($and->filters as $filter) {
+      $this->{'writeFilter'.$filter->kind}($filter);
+    }
+    $this->endSequence();
+  }
+
+  /** FILTER_AND = 0xa1 */
+  private function writeFilterOr($or) {
+    $this->startSequence(0xa1);
+    foreach ($or->filters as $filter) {
+      $this->{'writeFilter'.$filter->kind}($filter);
+    }
+    $this->endSequence();
+  }
+
+  /** FILTER_AND = 0xa2 */
+  private function writeFilterNot($not) {
+    $this->startSequence(0xa2);
+    $this->{'writeFilter'.$not->filter->kind}($not->filter);
+    $this->endSequence();
+  }
+
+  /** FILTER_EQUALITY = 0xa3 */
+  private function writeFilterEquality($eq) {
+    $this->startSequence(0xa4);
+    $this->writeString($eq->attribute);
+    $this->writeBuffer($eq->value, self::OCTETSTRING);
+    $this->endSequence();
+  }
+
+  /** FILTER_SUBSTRINGS = 0xa4 */
+  private function writeFilterSubstring($substr) {
+    $this->startSequence(0xa4);
+    $this->writeString($substr->attribute);
+
+    $this->startSequence();
+    if (null !== $substr->initial) {
+      $this->writeString($substr->initial, 0x80);
+    }
+    foreach ($substr->any as $string) {
+      $this->writeString($substr->any, 0x81);
+    }
+    if (null !== $substr->final) {
+      $this->writeString($substr->final, 0x82);
+    }
+    $this->endSequence();
+
+    $this->endSequence();
+  }
+
+  /** FILTER_GE = 0xa5 */
+  private function writeFilterGreaterThanEquals($ge) {
+    $this->startSequence(0xa5);
+    $this->writeString($ge->attribute);
+    $this->writeString($ge->value);
+    $this->endSequence();
+  }
+
+  /** FILTER_LE = 0xa6 */
+  private function writeFilterLessThanEquals($le) {
+    $this->startSequence(0xa6);
+    $this->writeString($le->attribute);
+    $this->writeString($le->value);
+    $this->endSequence();
+  }
+
+  /** FILTER_PRESENT = 0x87 */
+  private function writeFilterPresent($present) {
+    $this->startSequence(0x87);
+    for ($i= 0, $l= strlen($present->attribute); $i < $l; $i++) {
+      $this->writeByte($i);
+    }
+    $this->endSequence();
+  }
+
+  /** FILTER_APPROX = 0xa8 */
+  private function writeFilterApproximate($approx) {
+    $this->startSequence(0xa8);
+    $this->writeString($approx->attribute);
+    $this->writeString($approx->value);
+    $this->endSequence();
+  }
+
+  /** FILTER_EXT = 0xa9 */
+  private function writeFilterExtensible($approx) {
+    $this->startSequence(0xa09);
+
+    $this->writeString($approx->rule, 0x81);
+    $this->writeString($approx->type, 0x82);
+    $this->writeString($approx->value, 0x83);
+    if ($approx->attributes) {
+      $this->writeBoolean($approx->type, 0x84);
+    }
+    $this->endSequence();
+  }
+
+  /**
    * Ends current sequences
+   *
+   * @return void
    */
   public function endSequence() {
     $length= $this->encodeLength(strlen($this->write[0]) - 1);
@@ -267,7 +378,7 @@ class BerStream {
   }
 
   public function read($l) {
-    $t= debug_backtrace();
+    // $t= debug_backtrace();
     $chunk= $this->in->read($l);
     $this->read[0]-= strlen($chunk);
     // fprintf(STDOUT, "%s   READ %d bytes from %s, remain %d\n", str_repeat('   ', sizeof($this->read)), $l, $t[1]['function'], $this->read[0]);
