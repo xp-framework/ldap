@@ -4,6 +4,7 @@ use peer\SSLSocket;
 use peer\Socket;
 use peer\ldap\LDAPException;
 use peer\ldap\LDAPSearchResult;
+use peer\ldap\filter\Filters;
 
 class LdapProtocol {
   const REQ_BIND = 0x60;
@@ -51,6 +52,7 @@ class LdapProtocol {
     } else {
       $this->sock= new Socket($host, $port);
     }
+    $this->filters= new Filters();
   }
 
   /** @return string */
@@ -171,16 +173,7 @@ class LdapProtocol {
         $stream->writeInt(0);
         $stream->writeBoolean(false);
 
-        // substring filter {{{
-        $stream->startSequence(0xa4);
-
-        $stream->writeString('cn');
-        $stream->startSequence();
-        $stream->writeString('Friebe', 0x80);
-        $stream->endSequence();
-
-        $stream->endSequence();
-        // }}}
+        $stream->writeFilter($this->filters->parse($filter));
 
         $stream->startSequence();
         foreach ($attributes as $attribute) {
