@@ -41,6 +41,7 @@ class BerStream {
 
   protected $write= [''];
   protected $read= [0];
+  protected $buffer= null;
 
   protected $in, $out;
 
@@ -283,7 +284,7 @@ class BerStream {
 
   /** FILTER_EQUALITY = 0xa3 */
   private function writeFilterEquality($eq) {
-    $this->startSequence(0xa4);
+    $this->startSequence(0xa3);
     $this->writeString($eq->attribute);
     $this->writeBuffer($eq->value, self::OCTETSTRING);
     $this->endSequence();
@@ -378,15 +379,29 @@ class BerStream {
   }
 
   public function read($l) {
+    $chunk= $this->buffer;
+    $this->buffer= null;
+    while (strlen($chunk) < $l) {
+      $bytes= $this->in->read($l - strlen($chunk));
+      $this->read[0]-= strlen($bytes);
+      $chunk.= $bytes;
+    }
+
     // $t= debug_backtrace();
-    $chunk= $this->in->read($l);
-    $this->read[0]-= strlen($chunk);
     // fprintf(STDOUT, "%s   READ %d bytes from %s, remain %d\n", str_repeat('   ', sizeof($this->read)), $l, $t[1]['function'], $this->read[0]);
+
     return $chunk;
   }
 
+  public function peek() {
+    if (null === $this->buffer) {
+      $this->buffer= $this->in->read(1);
+    }
+    return unpack('Ctag', $this->buffer)['tag'];
+  }
+
   public function readTag($expected) {
-    $head= unpack('Ctag', $this->in->read(1));
+    $head= unpack('Ctag', $this->read(1));
     $test= (array)$expected;
     if (!in_array($head['tag'], $test)) {
       throw new \lang\IllegalStateException(sprintf(
@@ -445,10 +460,11 @@ class BerStream {
   /**
    * Reads a string
    *
+   * @param  int $tag
    * @return string
    */
-  public function readString() {
-    $this->readTag(self::OCTETSTRING);
+  public function readString($tag= self::OCTETSTRING) {
+    $this->readTag($tag);
     return $this->read($this->decodeLength());
   }
 
