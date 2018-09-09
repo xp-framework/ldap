@@ -41,7 +41,8 @@ class LdapProtocol {
   const STATUS_OK = 0;
 
   protected static $continue= [
-    self::RES_SEARCH_ENTRY => true
+    self::RES_SEARCH_ENTRY => true,
+    self::RES_EXTENSION => true,
   ];
 
   protected $messageId= 0;
@@ -181,7 +182,7 @@ class LdapProtocol {
         }
         $stream->endSequence();
       },
-      'res'   => [self::RES_SEARCH_ENTRY, self::RES_SEARCH],
+      'res'   => [self::RES_SEARCH_ENTRY, self::RES_SEARCH, self::RES_EXTENSION],
       'read'  => [
         self::RES_SEARCH_ENTRY => function($stream) {
           $name= $stream->readString();
@@ -195,11 +196,11 @@ class LdapProtocol {
             $attributes[$attr]= [];
             do {
               $attributes[$attr][]= $stream->readString();
-            } while ($stream->remaining());
+            } while ($stream->remaining() > 0);
             $stream->finishSequence();
 
             $stream->finishSequence();
-          } while ($stream->remaining());
+          } while ($stream->remaining() > 0);
           $stream->finishSequence();
           return ['dn' => $name, 'attr' => $attributes];
         },
@@ -209,6 +210,16 @@ class LdapProtocol {
           $error= $stream->readString();
 
           $this->handleResponse($status, $error ?: 'Search failed');
+        },
+        self::RES_EXTENSION => function($stream) {
+          $status= $stream->readEnumeration();
+          $matchedDN= $stream->readString();
+          $error= $stream->readString();
+
+          $name= 0x8a === $stream->peek() ? $stream->readString(0x8a) : null;
+          // $value= 0x8b === $stream->peek() ? $stream->readString(0x8b) : null;
+
+          $this->handleResponse($status, ($error ?: 'Search failed').($name ? ': '.$name : ''));
         }
       ]
     ]);
