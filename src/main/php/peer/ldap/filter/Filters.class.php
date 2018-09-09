@@ -13,12 +13,12 @@ class Filters {
    * Returns all braced expressions belonging together
    *
    * @param  string $input
-   * @return iterable
+   * @return peer.ldap.filter.Filter[]
    */
   private function all($input) {
     $o= $b= 0;
     $l= strlen($input);
-
+    $r= [];
     while ($o < $l) {
 
       // (&(objectClass=person)(cn~=Test))(cn=Test)
@@ -29,8 +29,9 @@ class Filters {
         if ('(' === $input{$o}) $b++; else if (')' === $input{$o}) $b--;
       } while ($o++ < $l && $b > 0);
 
-      yield $this->parse(substr($input, $s, $o));
+      $r[]= $this->parse(substr($input, $s, $o));
     }
+    return $r;
   }
 
   /**
