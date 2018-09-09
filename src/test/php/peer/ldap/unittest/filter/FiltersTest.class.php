@@ -118,7 +118,7 @@ class FiltersTest extends TestCase {
   }
 
   #[@test]
-  public function not() {
+  public function logical_not() {
     $this->assertEquals(
       new NotFilter(new EqualityFilter('cn', 'Test')),
       (new Filters())->parse('!(cn=Test)')
@@ -126,7 +126,7 @@ class FiltersTest extends TestCase {
   }
 
   #[@test]
-  public function and() {
+  public function logical_and() {
     $this->assertEquals(
       new AndFilter(
         new EqualityFilter('objectClass', 'person'),
@@ -137,7 +137,7 @@ class FiltersTest extends TestCase {
   }
 
   #[@test]
-  public function and_and_or() {
+  public function logical_and_and_or() {
     $this->assertEquals(
       new OrFilter(
         new AndFilter(
