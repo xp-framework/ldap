@@ -1,10 +1,12 @@
 <?php namespace peer\ldap\filter;
 
 class ExtensibleFilter implements Filter {
-  public $attribute, $rule, $value;
+  public $kind= 'extensible';
 
-  public function __construct($attribute, $rule, $value) {
-    $this->attribute= $attribute;
+  public $type, $rule, $value, $attributes;
+
+  public function __construct($type, $rule, $value, $attributes= false) {
+    $this->type= $type;
     $this->rule= $rule;
     $this->value= $value;
   }

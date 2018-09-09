@@ -1,6 +1,8 @@
 <?php namespace peer\ldap\filter;
 
 class SubstringFilter implements Filter {
+  public $kind= 'substring';
+
   public $attribute, $initial, $any, $final;
 
   public function __construct($attribute, $initial, $any, $final) {
