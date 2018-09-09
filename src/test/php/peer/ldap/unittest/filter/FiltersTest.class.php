@@ -1,5 +1,6 @@
 <?php namespace peer\ldap\unittest\filter;
 
+use lang\FormatException;
 use peer\ldap\filter\AndFilter;
 use peer\ldap\filter\ApproximateFilter;
 use peer\ldap\filter\EqualityFilter;
@@ -147,5 +148,17 @@ class FiltersTest extends TestCase {
       ),
       (new Filters())->parse('|(&(objectClass=person)(cn~=Test))(cn=Test)')
     );
+  }
+
+  #[@test, @expect(FormatException::class), @values([
+  #  'cn=',
+  #  '!cn=',
+  #  '^cn=value',
+  #  'cn^=value',
+  #  '(cn=value',
+  #  'GET / HTTP/1.1',
+  #])]
+  public function invalid($syntax) {
+   (new Filters())->parse($syntax);
   }
 }
