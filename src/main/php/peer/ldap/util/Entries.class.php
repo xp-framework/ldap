@@ -10,7 +10,7 @@ class Entries {
   }
 
   /** @return int */
-  public function size() { return sizeof($this->list); }
+  public function size() { return sizeof($this->list) - 1; }
 
   /**
    * Gets first entry
