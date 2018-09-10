@@ -7,46 +7,54 @@ use peer\ldap\LDAPSearchResult;
 use peer\ldap\filter\Filters;
 
 class LdapProtocol {
-  const REQ_BIND = 0x60;
-  const REQ_UNBIND = 0x42;
-  const REQ_SEARCH = 0x63;
-  const REQ_MODIFY = 0x66;
-  const REQ_ADD = 0x68;
-  const REQ_DELETE = 0x4a;
-  const REQ_MODRDN = 0x6c;
-  const REQ_COMPARE = 0x6e;
-  const REQ_ABANDON = 0x50;
-  const REQ_EXTENSION = 0x77;
+  const REQ_BIND            = 0x60;
+  const REQ_UNBIND          = 0x42;
+  const REQ_SEARCH          = 0x63;
+  const REQ_MODIFY          = 0x66;
+  const REQ_ADD             = 0x68;
+  const REQ_DELETE          = 0x4a;
+  const REQ_MODRDN          = 0x6c;
+  const REQ_COMPARE         = 0x6e;
+  const REQ_ABANDON         = 0x50;
+  const REQ_EXTENSION       = 0x77;
 
-  const RES_BIND = 0x61;
-  const RES_SEARCH_ENTRY = 0x64;
-  const RES_SEARCH_REF = 0x73;
-  const RES_SEARCH = 0x65;
-  const RES_MODIFY = 0x67;
-  const RES_ADD = 0x69;
-  const RES_DELETE = 0x6b;
-  const RES_MODRDN = 0x6d;
-  const RES_COMPARE = 0x6f;
-  const RES_EXTENSION = 0x78;
+  const RES_BIND            = 0x61;
+  const RES_SEARCH_ENTRY    = 0x64;
+  const RES_SEARCH_REF      = 0x73;
+  const RES_SEARCH          = 0x65;
+  const RES_MODIFY          = 0x67;
+  const RES_ADD             = 0x69;
+  const RES_DELETE          = 0x6b;
+  const RES_MODRDN          = 0x6d;
+  const RES_COMPARE         = 0x6f;
+  const RES_EXTENSION       = 0x78;
 
-  const SCOPE_BASE_OBJECT = 0;
-  const SCOPE_ONE_LEVEL   = 1;
-  const SCOPE_SUBTREE     = 2;
+  const SCOPE_BASE_OBJECT   = 0x00;
+  const SCOPE_ONE_LEVEL     = 0x01;
+  const SCOPE_SUBTREE       = 0x02;
 
-  const NEVER_DEREF_ALIASES = 0;
-  const DEREF_IN_SEARCHING = 1;
-  const DEREF_BASE_OBJECT = 2;
-  const DEREF_ALWAYS = 3;
+  const NEVER_DEREF_ALIASES = 0x00;
+  const DEREF_IN_SEARCHING  = 0x01;
+  const DEREF_BASE_OBJECT   = 0x02;
+  const DEREF_ALWAYS        = 0x03;
 
-  const STATUS_OK = 0;
+  const STATUS_OK           = 0x00;
 
   protected static $continue= [
     self::RES_SEARCH_ENTRY => true,
-    self::RES_EXTENSION => true,
+    self::RES_EXTENSION    => true,
   ];
 
   protected $messageId= 0;
 
+  /**
+   * Instantiate protocol
+   *
+   * @param  string $scheme
+   * @param  string $host
+   * @param  int $port
+   * @param  var $params
+   */
   public function __construct($scheme, $host, $port, $params) {
     if ('ldaps' === $scheme) {
       $this->sock= new SSLSocket($host, $port);  
