@@ -133,7 +133,7 @@ class LDAPConnection implements Value {
    * @see     php://ldap_search
    */
   public function search($base, $filter, $attributes= [], $attrsOnly= 0, $sizeLimit= 0, $timeLimit= 0, $deref= LDAP_DEREF_NEVER) {
-    return $this->proto->search(
+    return new LDAPSearchResult($this->proto->search(
       LDAPQuery::SCOPE_SUB,
       $base,
       $filter,
@@ -143,7 +143,7 @@ class LDAPConnection implements Value {
       $timeLimit,
       null,
       $deref
-    );
+    ));
   }
   
   /**
@@ -153,7 +153,7 @@ class LDAPConnection implements Value {
    * @return  peer.ldap.LDAPSearchResult search result object
    */
   public function searchBy(LDAPQuery $filter) {
-    return $this->proto->search(
+    return new LDAPSearchResult($this->proto->search(
       $filter->getScope(),
       $filter->getBase(),
       $filter->getFilter(),
@@ -163,7 +163,7 @@ class LDAPConnection implements Value {
       $filter->getTimelimit(),
       $filter->getSort(),
       $filter->getDeref()
-    );
+    ));
   }
   
   /**

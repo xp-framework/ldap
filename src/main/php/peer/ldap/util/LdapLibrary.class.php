@@ -133,7 +133,7 @@ class LdapLibrary {
       $entries= new LDAPEntries($this->handle, $res);
     }
 
-    return new LDAPSearchResult($entries);
+    return $entries;
   }
 
   /**

@@ -223,11 +223,13 @@ class LdapProtocol {
         }
       ]
     ]);
-    return new LDAPSearchResult(new Entries($r));
+    return new Entries($r);
   }
 
   /**
    * Closes the connection
+   *
+   * @return void
    */
   public function close() {
     $this->stream->close();
