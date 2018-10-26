@@ -282,8 +282,8 @@ class LDAPQuery implements Value {
    * @return  self $this
    */
   public function setDeref($deref) {
-    return $this;
     $this->deref= $deref;
+    return $this;
   }
 
   /**
