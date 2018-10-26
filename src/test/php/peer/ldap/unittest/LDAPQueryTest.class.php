@@ -92,4 +92,12 @@ class LDAPQueryTest extends TestCase {
   public function invalid_object_argument() {
     (new LDAPQuery())->prepare('%d', new \StdClass());
   }
+
+  #[@test]
+  public function deref_setter() {
+    $this->assertEquals(
+      LDAP_DEREF_ALWAYS,
+      (new LDAPQuery())->setDeref(LDAP_DEREF_ALWAYS)->getDeref()
+    );
+  }
 }
