@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 8.1.2 / 2018-10-26
+
+* Merged PR #14: Bug: Use correct order of calls - @johannes85
+
 ## 8.1.1 / 2018-07-30
 
 * Fixed issue #13: Warning *"continue" targeting switch is equivalent to 
