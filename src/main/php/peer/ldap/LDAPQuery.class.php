@@ -63,7 +63,7 @@ class LDAPQuery implements Value {
     while ($tok= strtok('%')) {
     
       // Support %1$s syntax
-      if (is_numeric($tok{0})) {
+      if (is_numeric($tok[0])) {
         sscanf($tok, '%d$', $ofs);
         $ofs--;
         $mod= strlen($ofs) + 1;
@@ -74,7 +74,7 @@ class LDAPQuery implements Value {
 
       // Type-based conversion
       if ($args[$ofs] instanceof Date) {
-        $tok{$mod}= 's';
+        $tok[$mod]= 's';
         $arg= $args[$ofs]->toString('YmdHi\\ZO');
       } else if ($args[$ofs] instanceof Value) {
         $arg= $args[$ofs]->toString();
@@ -86,7 +86,7 @@ class LDAPQuery implements Value {
       
       // NULL actually doesn't exist in LDAP, but is being used here to
       // clarify things (ie. show that no argument has been passed)
-      switch ($tok{$mod}) {
+      switch ($tok[$mod]) {
         case 'd': $r= null === $arg ? 'NULL' : sprintf('%.0f', $arg); break;
         case 'f': $r= null === $arg ? 'NULL' : floatval($arg); break;
         case 'c': $r= null === $arg ? 'NULL' : $arg; break;
