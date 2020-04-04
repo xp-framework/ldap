@@ -3,6 +3,10 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 8.1.3 / 2020-04-04
+
+* Made compatible with XP 10 - @thekid
+
 ## 8.1.2 / 2018-10-26
 
 * Merged PR #14: Bug: Use correct order of calls - @johannes85
