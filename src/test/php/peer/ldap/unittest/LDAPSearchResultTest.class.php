@@ -1,7 +1,6 @@
 <?php namespace peer\ldap\unittest;
  
-use peer\ldap\LDAPSearchResult;
-use peer\ldap\LDAPEntry;
+use peer\ldap\{LDAPEntry, LDAPSearchResult};
 
 class LDAPSearchResultTest extends \unittest\TestCase {
 

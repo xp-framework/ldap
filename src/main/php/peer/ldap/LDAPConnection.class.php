@@ -1,9 +1,7 @@
 <?php namespace peer\ldap;
 
-use peer\ConnectException;
-use peer\URL;
-use lang\XPClass;
-use lang\IllegalArgumentException;
+use lang\{IllegalArgumentException, XPClass};
+use peer\{ConnectException, URL};
 use util\Secret;
 
 /**

@@ -1,9 +1,7 @@
 <?php namespace peer\ldap;
 
-use lang\IllegalArgumentException;
-use lang\Value;
-use util\Date;
-use util\Objects;
+use lang\{IllegalArgumentException, Value};
+use util\{Date, Objects};
 
 /**
  * Class encapsulating LDAP queries.

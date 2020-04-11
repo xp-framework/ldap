@@ -1,8 +1,8 @@
 <?php namespace peer\ldap\unittest;
 
-use peer\ldap\LDAPConnection;
-use peer\URL;
 use lang\IllegalArgumentException;
+use peer\URL;
+use peer\ldap\LDAPConnection;
 
 class LDAPConnectionTest extends \unittest\TestCase {
 
