@@ -1,8 +1,9 @@
 <?php namespace peer\ldap\unittest;
  
-use peer\ldap\{LDAPEntry, LDAPSearchResult};
+use peer\ldap\{LDAPEntry, LDAPEntries, LDAPSearchResult};
+use unittest\TestCase;
 
-class LDAPSearchResultTest extends \unittest\TestCase {
+class LDAPSearchResultTest extends TestCase {
 
   /**
    * Creates a new LDAPEntries
@@ -11,21 +12,21 @@ class LDAPSearchResultTest extends \unittest\TestCase {
    * @return peer.ldap.LDAPEntries
    */
   private function newEntries($dns= []) {
-    return newinstance('peer.ldap.LDAPEntries', [$dns], [
-      'entries' => [],
-      'offset' => 0,
-      '__construct' => function($entries) { $this->entries= $entries; },
-      'entry' => function($offset) {
+    return new class($dns) extends LDAPEntries {
+      private $entries, $offset= 0;
+
+      public function __construct($entries) { $this->entries= $entries; }
+      public function entry($offset) {
         return isset($this->entries[$offset])
           ? new LDAPEntry($this->entries[$offset], [])
           : null
         ;
-      },
-      'size' => function() { return sizeof($this->entries); },
-      'first' => function() { return $this->entry($this->offset= 0); },
-      'next' => function() { return $this->entry(++$this->offset); },
-      'close' => function() { $this->entries= null; }
-    ]);
+      }
+      public function size() { return sizeof($this->entries); }
+      public function first() { return $this->entry($this->offset= 0); }
+      public function next() { return $this->entry(++$this->offset); }
+      public function close() { $this->entries= null; }
+    };
   }
 
   #[@test]
