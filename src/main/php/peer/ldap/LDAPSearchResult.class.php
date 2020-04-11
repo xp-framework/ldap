@@ -1,5 +1,6 @@
 <?php namespace peer\ldap;
 
+use lang\Value;
 use util\Objects;
 
 /**
@@ -8,7 +9,7 @@ use util\Objects;
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult implements \lang\Value, \Iterator {
+class LDAPSearchResult implements Value, \Iterator {
   private $entries;
   private $first= null;
   private $all= null;
@@ -58,7 +59,7 @@ class LDAPSearchResult implements \lang\Value, \Iterator {
       } while ($entry= $this->entries->next());
     }
     
-    return isset($this->all[$offset]) ? $this->all[$offset] : null;
+    return $this->all[$offset] ?? null;
   }
 
   /**

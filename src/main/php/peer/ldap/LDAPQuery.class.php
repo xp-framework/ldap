@@ -319,7 +319,7 @@ class LDAPQuery implements Value {
       "}",
       nameof($this),
       $this->filter,
-      isset($scopes[$this->scope]) ? $scopes[$this->scope] : '(unknown '.$this->scope.')',
+      $scopes[$this->scope] ?? '(unknown '.$this->scope.')',
       $this->base,
       Objects::stringOf($this->attrs),
       $this->attrsOnly  ? 'true' : 'false',

@@ -100,10 +100,10 @@ class LDAPEntry implements \lang\Value {
    */
   public function getAttribute($key, $idx= -1) {
     $lkey= strtolower($key);
-    return (($idx >= 0)
-      ? (isset($this->attributes[$lkey][$idx]) ? $this->attributes[$lkey][$idx] : null)
-      : (isset($this->attributes[$lkey]) ? $this->attributes[$lkey] : null)
-    );
+    return $idx >= 0
+      ? ($this->attributes[$lkey][$idx] ?? null)
+      : ($this->attributes[$lkey] ?? null)
+    ;
   }
   
   /**
