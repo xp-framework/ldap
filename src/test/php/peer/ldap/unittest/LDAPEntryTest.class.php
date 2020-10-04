@@ -1,6 +1,7 @@
 <?php namespace peer\ldap\unittest;
  
 use peer\ldap\LDAPEntry;
+use unittest\Test;
 
 /**
  * Test LDAP entry class
@@ -36,37 +37,37 @@ abstract class LDAPEntryTest extends \unittest\TestCase {
     $this->fixture= $this->newInstance(self::DN, $this->attributes);
   }
 
-  #[@test]
+  #[Test]
   public function getDN() {
     $this->assertEquals(self::DN, $this->fixture->getDN());
   }
 
-  #[@test]
+  #[Test]
   public function getAttributes() {
     $this->assertEquals(array_change_key_case($this->attributes, CASE_LOWER), $this->fixture->getAttributes());
   }
 
-  #[@test]
+  #[Test]
   public function cnAttribute() {
     $this->assertEquals(['Friebe, Timm J.'], $this->fixture->getAttribute('cn'));
   }
 
-  #[@test]
+  #[Test]
   public function firstCnAttribute() {
     $this->assertEquals('Friebe, Timm J.', $this->fixture->getAttribute('cn', 0));
   }
 
-  #[@test]
+  #[Test]
   public function unicodeAttribute() {
     $this->assertEquals('Übercoder', $this->fixture->getAttribute('displayName', 0));
   }
 
-  #[@test]
+  #[Test]
   public function nonExistantAttribute() {
     $this->assertEquals(null, $this->fixture->getAttribute('@@NON-EXISTANT@@'));
   }
 
-  #[@test]
+  #[Test]
   public function objectClassAttribute() {
     $this->assertEquals(
       $this->attributes['objectClass'],
@@ -74,17 +75,17 @@ abstract class LDAPEntryTest extends \unittest\TestCase {
     );
   }
 
-  #[@test]
+  #[Test]
   public function isInetOrgPerson() {
     $this->assertTrue($this->fixture->isA('inetOrgPerson'));
   }
 
-  #[@test]
+  #[Test]
   public function isNotAliasObject() {
     $this->assertFalse($this->fixture->isA('alias'));
   }
   
-  #[@test]
+  #[Test]
   public function addAttributeTest() {
     $this->fixture->setAttribute('newAttribute', 'newValue');
     

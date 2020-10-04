@@ -3,6 +3,7 @@
 use lang\IllegalArgumentException;
 use peer\URL;
 use peer\ldap\LDAPConnection;
+use unittest\{Expect, Test, Values};
 
 class LDAPConnectionTest extends \unittest\TestCase {
 
@@ -20,22 +21,22 @@ class LDAPConnectionTest extends \unittest\TestCase {
     ];
   }
 
-  #[@test, @values('dsns')]
+  #[Test, Values('dsns')]
   public function can_create_from_dsn_string($dsn) {
     new LDAPConnection($dsn);
   }
 
-  #[@test, @values('dsns')]
+  #[Test, Values('dsns')]
   public function can_create_from_dsn_url($dsn) {
     new LDAPConnection(new URL($dsn));
   }
 
-  #[@test, @expect(IllegalArgumentException::class)]
+  #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_option() {
     new LDAPConnection('ldap://example.com/?unkown=value');
   }
 
-  #[@test]
+  #[Test]
   public function dsn() {
     $this->assertEquals(new URL('ldap://example.com'), (new LDAPConnection('ldap://example.com'))->dsn());
   }

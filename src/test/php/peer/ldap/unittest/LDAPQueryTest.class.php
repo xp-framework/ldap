@@ -2,7 +2,7 @@
  
 use lang\IllegalArgumentException;
 use peer\ldap\LDAPQuery;
-use unittest\TestCase;
+use unittest\{Expect, Test, TestCase, Values};
 use util\Date;
 
 /**
@@ -12,22 +12,22 @@ use util\Date;
  */
 class LDAPQueryTest extends TestCase {
 
-  #[@test]
+  #[Test]
   public function can_create() {
     new LDAPQuery();
   }
 
-  #[@test]
+  #[Test]
   public function can_create_with_base() {
     $this->assertEquals('dc=example,dc=com', (new LDAPQuery('dc=example,dc=com'))->getBase());
   }
 
-  #[@test]
+  #[Test]
   public function can_create_with_base_filter_and_format_args() {
     $this->assertEquals('(uid=test)', (new LDAPQuery('dc=example,dc=com', '(uid=%s)', 'test'))->getFilter());
   }
 
-  #[@test]
+  #[Test]
   public function replaces_s_token_with_string() {
     $this->assertEquals(
       '(&(objectClass=*)(uid=kiesel))',
@@ -35,38 +35,32 @@ class LDAPQueryTest extends TestCase {
     );
   }
 
-  #[@test]
+  #[Test]
   public function percent_sign_first() {
     $this->assertEquals('foo bar', (new LDAPQuery())->prepare('%s', 'foo bar'));
   }
 
-  #[@test]
+  #[Test]
   public function percent_sign_escaping() {
     $this->assertEquals('foo%bar', (new LDAPQuery())->prepare('foo%%bar', 'arg'));
   }
 
-  #[@test]
+  #[Test]
   public function numbered_tokens_are_supported() {
     $this->assertEquals('foo bar', (new LDAPQuery())->prepare('%2$s %1$s', 'bar', 'foo'));
   }
 
-  #[@test, @values([
-  #  ['foo(bar', 'foo\\28bar'],
-  #  ['foo)bar', 'foo\\29bar'],
-  #  ['foo\\bar', 'foo\\5cbar'],
-  #  ['foo*bar', 'foo\\2abar'],
-  #  ["foo\000bar", 'foo\\00bar']
-  #])]
+  #[Test, Values([['foo(bar', 'foo\\28bar'], ['foo)bar', 'foo\\29bar'], ['foo\\bar', 'foo\\5cbar'], ['foo*bar', 'foo\\2abar'], ["foo\000bar", 'foo\\00bar']])]
   public function special_characters_are_escaped($input, $expected) {
     $this->assertEquals($expected, (new LDAPQuery())->prepare('%s', $input));
   }
 
-  #[@test]
+  #[Test]
   public function copy_through_token() {
     $this->assertEquals('foo(*'.chr(0).'\\)bar', (new LDAPQuery())->prepare('%c', 'foo(*'.chr(0).'\\)bar'));
   }
   
-  #[@test, @values(['%d', '%s'])]
+  #[Test, Values(['%d', '%s'])]
   public function dates_as_argument($token) {
     $this->assertEquals(
       '198005280630Z+0200',
@@ -74,26 +68,22 @@ class LDAPQueryTest extends TestCase {
     );
   }
 
-  #[@test, @values(['%d', '%s'])]
+  #[Test, Values(['%d', '%s'])]
   public function null_as_argument($token) {
     $this->assertEquals('NULL', (new LDAPQuery())->prepare($token, null));
   }
 
-  #[@test, @expect(IllegalArgumentException::class), @values([
-  #  [[]],
-  #  [[1, 2, 3]],
-  #  [['color' => 'green']],
-  #])]
+  #[Test, Expect(IllegalArgumentException::class), Values([[[]], [[1, 2, 3]], [['color' => 'green']],])]
   public function invalid_array_argument($arg) {
     (new LDAPQuery())->prepare('%d', $arg);
   }
 
-  #[@test, @expect(IllegalArgumentException::class)]
+  #[Test, Expect(IllegalArgumentException::class)]
   public function invalid_object_argument() {
     (new LDAPQuery())->prepare('%d', new \StdClass());
   }
 
-  #[@test]
+  #[Test]
   public function deref_setter() {
     $this->assertEquals(
       LDAP_DEREF_ALWAYS,

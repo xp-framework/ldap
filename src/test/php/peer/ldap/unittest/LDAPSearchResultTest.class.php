@@ -1,7 +1,7 @@
 <?php namespace peer\ldap\unittest;
  
-use peer\ldap\{LDAPEntry, LDAPEntries, LDAPSearchResult};
-use unittest\TestCase;
+use peer\ldap\{LDAPEntries, LDAPEntry, LDAPSearchResult};
+use unittest\{Test, TestCase, Values};
 
 class LDAPSearchResultTest extends TestCase {
 
@@ -29,29 +29,22 @@ class LDAPSearchResultTest extends TestCase {
     };
   }
 
-  #[@test]
+  #[Test]
   public function can_create() {
     new LDAPSearchResult($this->newEntries());
   }
 
-  #[@test, @values([
-  #  [[]],
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test'], ['cn=second,o=test']]
-  #])]
+  #[Test, Values([[[]], [['cn=first,o=test']], [['cn=first,o=test'], ['cn=second,o=test']]])]
   public function numEntries($entries) {
     $this->assertEquals(sizeof($entries), (new LDAPSearchResult($this->newEntries($entries)))->numEntries());
   }
 
-  #[@test]
+  #[Test]
   public function no_first_entry() {
     $this->assertNull((new LDAPSearchResult($this->newEntries()))->getFirstEntry());
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test'], ['cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test'], ['cn=second,o=test']]])]
   public function first($entries) {
     $this->assertEquals(
       new LDAPEntry($entries[0], []),
@@ -59,15 +52,12 @@ class LDAPSearchResultTest extends TestCase {
     );
   }
 
-  #[@test]
+  #[Test]
   public function no_next_entry() {
     $this->assertNull((new LDAPSearchResult($this->newEntries()))->getNextEntry());
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test', 'cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test', 'cn=second,o=test']]])]
   public function next($entries) {
     $this->assertEquals(
       new LDAPEntry($entries[0], []),
@@ -75,10 +65,7 @@ class LDAPSearchResultTest extends TestCase {
     );
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test', 'cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test', 'cn=second,o=test']]])]
   public function iteration_via_next($entries) {
     $result= new LDAPSearchResult($this->newEntries($entries));
     $actual= [];
@@ -88,10 +75,7 @@ class LDAPSearchResultTest extends TestCase {
     $this->assertEquals($actual, $entries);
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test', 'cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test', 'cn=second,o=test']]])]
   public function iteration_via_first_and_ext($entries) {
     $result= new LDAPSearchResult($this->newEntries($entries));
     $actual= [];
@@ -101,15 +85,12 @@ class LDAPSearchResultTest extends TestCase {
     $this->assertEquals($actual, $entries);
   }
 
-  #[@test]
+  #[Test]
   public function no_entry_zero() {
     $this->assertNull((new LDAPSearchResult($this->newEntries()))->getEntry(0));
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test', 'cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test', 'cn=second,o=test']]])]
   public function entry_zero($entries) {
     $this->assertEquals(
       new LDAPEntry($entries[0], []),
@@ -117,10 +98,7 @@ class LDAPSearchResultTest extends TestCase {
     );
   }
 
-  #[@test, @values([
-  #  [['cn=first,o=test']],
-  #  [['cn=first,o=test', 'cn=second,o=test']]
-  #])]
+  #[Test, Values([[['cn=first,o=test']], [['cn=first,o=test', 'cn=second,o=test']]])]
   public function iteration_via_foreach($entries) {
     $result= new LDAPSearchResult($this->newEntries($entries));
     $actual= [];
