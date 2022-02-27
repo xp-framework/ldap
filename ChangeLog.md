@@ -5,6 +5,7 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 9.1.0 / 2022-02-27
 
+* Made `LDAPSearchResult` implement `lang.Closeable` - @thekid
 * Made library compatible with XP 11 - @thekid
 * Simplified iteration code in `LDAPSearchResult` - @thekid
 

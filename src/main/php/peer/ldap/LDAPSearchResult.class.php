@@ -1,7 +1,7 @@
 <?php namespace peer\ldap;
 
 use IteratorAggregate, Traversable;
-use lang\Value;
+use lang\{Value, Closeable};
 use util\Objects;
 
 /**
@@ -10,7 +10,7 @@ use util\Objects;
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult implements Value, IteratorAggregate {
+class LDAPSearchResult implements Value, Closeable, IteratorAggregate {
   private $entries;
   private $first= null;
   private $all= null;
