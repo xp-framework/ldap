@@ -1,5 +1,6 @@
 <?php namespace peer\ldap;
 
+use IteratorAggregate, Traversable;
 use lang\Value;
 use util\Objects;
 
@@ -9,11 +10,10 @@ use util\Objects;
  * @see      php://ldap_get_entries
  * @test     xp://peer.ldap.unittest.LDAPSearchResultTest
  */
-class LDAPSearchResult implements Value, \Iterator {
+class LDAPSearchResult implements Value, IteratorAggregate {
   private $entries;
   private $first= null;
   private $all= null;
-  private $iteration= null;
 
   /**
    * Constructor
@@ -94,29 +94,14 @@ class LDAPSearchResult implements Value, \Iterator {
     return $this->entries->close();
   }
 
-  /** @return void */
-  public function rewind() {
-    $this->iteration= [$this->entries->first(), 0];
-  }
-
-  /** @return peer.ldap.LDAPEntry */
-  public function current() {
-    return $this->iteration[0];
-  }
-
-  /** @return int */
-  public function key() {
-    return $this->iteration[1];
-  }
-
-  /** @return void */
-  public function next() {
-    $this->iteration= [$this->entries->next(), ++$this->iteration[1]];
-  }
-
-  /** @return bool */
-  public function valid() {
-    return null !== $this->iteration[0];
+  /**
+   * Iterate over all the entries
+   */
+  public function getIterator(): Traversable {
+    $entry= $this->entries->first();
+    do {
+      yield $entry;
+    } while ($entry= $this->entries->next());
   }
 
   /**
