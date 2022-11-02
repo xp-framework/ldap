@@ -3,6 +3,12 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 9.1.1 / 2022-11-02
+
+* Fixed issue #15: BC break between 9.0 and 9.1 when iterationg over
+  LDAPSearchResult
+  (@thekid)
+
 ## 9.1.0 / 2022-02-27
 
 * Made `LDAPSearchResult` implement `lang.Closeable` - @thekid

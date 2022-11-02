@@ -105,6 +105,12 @@ class LDAPSearchResultTest extends TestCase {
     foreach ($result as $entry) {
       $actual[]= $entry->getDN();
     }
-    $this->assertEquals($actual, $entries);
+    $this->assertEquals($entries, $actual);
+  }
+
+  #[Test]
+  public function iteration_via_foreach_when_first_returns_null() {
+    $result= new LDAPSearchResult($this->newEntries());
+    $this->assertEquals([], iterator_to_array($result));
   }
 }

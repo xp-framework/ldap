@@ -99,9 +99,10 @@ class LDAPSearchResult implements Value, Closeable, IteratorAggregate {
    */
   public function getIterator(): Traversable {
     $entry= $this->entries->first();
-    do {
+    while ($entry) {
       yield $entry;
-    } while ($entry= $this->entries->next());
+      $entry= $this->entries->next();
+    }
   }
 
   /**
