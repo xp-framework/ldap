@@ -5,7 +5,7 @@ LDAP protocol support for the XP Framework ChangeLog
 
 ## 9.1.1 / 2022-11-02
 
-* Fixed issue #15: BC break between 9.0 and 9.1 when iterationg over
+* Fixed issue #15: BC break between 9.0 and 9.1 when iterating over
   LDAPSearchResult
   (@thekid)
 
